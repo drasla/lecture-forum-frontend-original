@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router"; // react-router-dom v6+ 최신 문법
 import styled from "styled-components";
-import { FiSun, FiMoon, FiUser } from "react-icons/fi"; // react-icons
+import { FiSun, FiMoon, FiUser } from "react-icons/fi";
+import { IoChatbubbles } from "react-icons/io5"; // react-icons
 // import { useAuthStore } from "../../../store/useAuthStore";
 // import { useThemeStore } from "../../../store/useThemeStore";
 
@@ -17,7 +18,10 @@ function MainHeader() {
         <HeaderContainer>
             <HeaderInner>
                 {/* 1. 로고 영역 */}
-                <Logo to="/">토론대난투</Logo>
+                <Logo to="/">
+                    <IoChatbubbles size={28} />
+                    <span>토론대난투</span>
+                </Logo>
 
                 {/* 2. 네비게이션 및 우측 메뉴 영역 */}
                 <NavGroup>
@@ -79,10 +83,18 @@ const HeaderInner = styled.div`
 `;
 
 const Logo = styled(Link)`
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 아이콘과 글자 사이의 간격 */
     font-size: 24px;
     font-weight: 800;
     color: ${({ theme }) => theme.colors.primary};
     letter-spacing: -0.5px;
+
+    /* 아이콘 색상도 로고 글자색과 동일하게 맞춥니다 */
+    svg {
+        color: inherit;
+    }
 `;
 
 const NavGroup = styled.div`
