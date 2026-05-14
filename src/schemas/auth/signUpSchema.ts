@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { Gender } from "../../types/user.type.ts";
 
+const phoneRegex = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
+
 export const signUpSchema = z
     .object({
         username: z
@@ -15,6 +17,7 @@ export const signUpSchema = z
             .min(2, "닉네임은 2자 이상 입력해주세요.")
             .max(10, "닉네임은 10자 이하로 입력해주세요."),
         email: z.email("올바른 이메일 형식이 아닙니다."),
+        phoneNumber: z.string().regex(phoneRegex, "올바른 전화번호 형식이 아닙니다.").optional(),
         birthdate: z.string().optional(),
         gender: z.enum(Gender),
     })

@@ -4,12 +4,19 @@ import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 export type ButtonColorType = "primary" | "secondary" | "success" | "error" | "warning" | "info";
 export type ButtonVariantType = "contained" | "text" | "icon";
 
-const StyledButton = styled.button<{ $color: ButtonColorType; $variant: ButtonVariantType }>`
+const StyledButton = styled.button<{
+    $color?: ButtonColorType;
+    $variant?: ButtonVariantType;
+    $fullWidth?: boolean;
+}>`
+    width: ${props => (props.$fullWidth ? "100%" : "auto")};
     font-size: 14px;
     font-weight: 600;
     color: ${props => (props.$variant === "contained" ? "#ffffff" : "inherit")};
     background-color: ${props =>
-        props.$variant === "contained" ? props.theme.colors[props.$color] : "transparent"};
+        props.$variant === "contained" && props.$color
+            ? props.theme.colors[props.$color]
+            : "transparent"};
     padding: ${props => (props.$variant === "icon" ? "8px" : "8px 12px")};
     border-radius: ${props => (props.$variant === "icon" ? "50%" : "6px")};
     transition: all 0.5s;
@@ -28,15 +35,16 @@ const StyledButton = styled.button<{ $color: ButtonColorType; $variant: ButtonVa
 // 즉, 우리가 만든 Button 컴포넌트는 button의 확장판이다
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
     children: ReactNode;
-    color: ButtonColorType;
-    variant: ButtonVariantType;
+    color?: ButtonColorType;
+    variant?: ButtonVariantType;
     as?: ElementType;
     to?: string;
+    fullWidth?: boolean;
 }
 
-function Button({ children, color, variant, ...props }: Props) {
+function Button({ children, color, variant, fullWidth, ...props }: Props) {
     return (
-        <StyledButton $color={color} $variant={variant} {...(props as any)}>
+        <StyledButton $color={color} $variant={variant} $fullWidth={fullWidth} {...(props as any)}>
             {children}
         </StyledButton>
     );

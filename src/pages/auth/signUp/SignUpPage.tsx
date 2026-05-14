@@ -1,10 +1,19 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
-import styled from "styled-components";
 import { type SignUpInputType, signUpSchema } from "../../../schemas/auth/signUpSchema.ts";
 import * as axios from "axios";
 import axiosInstance from "../../../api/axiosInstance.ts";
+import {
+    AuthForm,
+    AuthFormCard,
+    AuthPageContainer,
+    AuthRootErrorMessage,
+    AuthSubTitle,
+    AuthTitle,
+} from "../../../components/auth/auth.style.tsx";
+import InputGroup from "../../../components/common/input/InputGroup.tsx";
+import Button from "../../../components/common/button/Button.tsx";
 
 function SignUpPage() {
     const navigate = useNavigate();
@@ -50,222 +59,96 @@ function SignUpPage() {
     };
 
     return (
-        <PageContainer>
-            <FormCard>
-                <Title>회원가입</Title>
-                <SubTitle>토론대난투에 오신 것을 환영합니다!</SubTitle>
+        <AuthPageContainer>
+            <AuthFormCard>
+                <AuthTitle>회원가입</AuthTitle>
+                <AuthSubTitle>토론대난투에 오신 것을 환영합니다!</AuthSubTitle>
 
-                <Form onSubmit={handleSubmit(onSubmit)}>
+                <AuthForm onSubmit={handleSubmit(onSubmit)}>
                     {/* 1. 아이디 */}
-                    <InputGroup>
-                        <Label htmlFor="username">아이디</Label>
-                        <Input
-                            id="username"
-                            placeholder="4자 이상 20자 이하"
-                            $hasError={!!errors.username}
-                            {...register("username")}
-                        />
-                        {errors.username && <ErrorMessage>{errors.username.message}</ErrorMessage>}
-                    </InputGroup>
+                    <InputGroup
+                        id={"username"}
+                        label={"아이디"}
+                        placeholder={"4자 이상 10자 이하"}
+                        errorMessage={errors.username?.message}
+                        registerObj={register("username")}
+                    />
 
                     {/* 2. 비밀번호 */}
-                    <InputGroup>
-                        <Label htmlFor="password">비밀번호</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="특수문자 포함 8자 이상"
-                            $hasError={!!errors.password}
-                            {...register("password")}
-                        />
-                        {errors.password && <ErrorMessage>{errors.password.message}</ErrorMessage>}
-                    </InputGroup>
+                    <InputGroup
+                        id={"password"}
+                        label={"비밀번호"}
+                        type={"password"}
+                        placeholder={"특수문자 포함 8자 이상"}
+                        errorMessage={errors.password?.message}
+                        registerObj={register("password")}
+                    />
 
                     {/* 3. 비밀번호 확인 */}
-                    <InputGroup>
-                        <Label htmlFor="passwordConfirm">비밀번호 확인</Label>
-                        <Input
-                            id="passwordConfirm"
-                            type="password"
-                            placeholder="비밀번호를 한 번 더 입력해주세요"
-                            $hasError={!!errors.passwordConfirm}
-                            {...register("passwordConfirm")}
-                        />
-                        {errors.passwordConfirm && (
-                            <ErrorMessage>{errors.passwordConfirm.message}</ErrorMessage>
-                        )}
-                    </InputGroup>
+                    <InputGroup
+                        id={"passwordConfirm"}
+                        label={"비밀번호 확인"}
+                        type={"password"}
+                        placeholder={"비밀번호를 한 번 더 입력해주세요"}
+                        errorMessage={errors.passwordConfirm?.message}
+                        registerObj={register("passwordConfirm")}
+                    />
 
                     {/* 4. 이름 */}
-                    <InputGroup>
-                        <Label htmlFor="name">이름 (실명)</Label>
-                        <Input
-                            id="name"
-                            placeholder="홍길동"
-                            $hasError={!!errors.name}
-                            {...register("name")}
-                        />
-                        {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
-                    </InputGroup>
+                    <InputGroup
+                        id={"name"}
+                        label={"이름"}
+                        errorMessage={errors.name?.message}
+                        registerObj={register("name")}
+                    />
 
                     {/* 5. 닉네임 */}
-                    <InputGroup>
-                        <Label htmlFor="nickname">닉네임</Label>
-                        <Input
-                            id="nickname"
-                            placeholder="토론에서 사용할 멋진 닉네임"
-                            $hasError={!!errors.nickname}
-                            {...register("nickname")}
-                        />
-                        {errors.nickname && <ErrorMessage>{errors.nickname.message}</ErrorMessage>}
-                    </InputGroup>
+                    <InputGroup
+                        id={"nickname"}
+                        label={"닉네임"}
+                        errorMessage={errors.nickname?.message}
+                        registerObj={register("nickname")}
+                    />
 
                     {/* 6. 이메일 */}
-                    <InputGroup>
-                        <Label htmlFor="email">이메일</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="example@wepoll.kr"
-                            $hasError={!!errors.email}
-                            {...register("email")}
-                        />
-                        {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                    </InputGroup>
+                    <InputGroup
+                        id={"email"}
+                        label={"이메일"}
+                        errorMessage={errors.email?.message}
+                        registerObj={register("email")}
+                    />
 
-                    {errors.root && <RootErrorMessage>{errors.root.message}</RootErrorMessage>}
+                    <InputGroup
+                        id={"phoneNumber"}
+                        label={"전화번호"}
+                        errorMessage={errors.phoneNumber?.message}
+                        registerObj={register("phoneNumber")}
+                        type={"tel"}
+                    />
 
-                    <SubmitButton type="submit" disabled={isSubmitting}>
+                    <InputGroup
+                        id={"birthdate"}
+                        label={"생년월일"}
+                        errorMessage={errors.birthdate?.message}
+                        registerObj={register("birthdate")}
+                        type={"date"}
+                    />
+
+                    {errors.root && (
+                        <AuthRootErrorMessage>{errors.root.message}</AuthRootErrorMessage>
+                    )}
+
+                    <Button
+                        fullWidth={true}
+                        variant={"contained"}
+                        type="submit"
+                        disabled={isSubmitting}>
                         {isSubmitting ? "가입하는 중..." : "회원가입 완료"}
-                    </SubmitButton>
-                </Form>
-            </FormCard>
-        </PageContainer>
+                    </Button>
+                </AuthForm>
+            </AuthFormCard>
+        </AuthPageContainer>
     );
 }
 
 export default SignUpPage;
-
-// --- Styled Components ---
-
-const PageContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-`;
-
-const FormCard = styled.div`
-    width: 100%;
-    max-width: 480px;
-    background-color: ${({ theme }) => theme.colors.background.paper};
-    padding: 48px 40px;
-    border-radius: 16px;
-    box-shadow:
-        0 10px 25px -5px rgba(0, 0, 0, 0.05),
-        0 8px 10px -6px rgba(0, 0, 0, 0.01);
-
-    /* 다크모드일 때 테두리가 살짝 보이도록 처리 */
-    border: 1px solid ${({ theme }) => theme.colors.divider};
-`;
-
-const Title = styled.h1`
-    font-size: 28px;
-    font-weight: 800;
-    color: ${({ theme }) => theme.colors.text.default};
-    margin-bottom: 8px;
-    text-align: center;
-`;
-
-const SubTitle = styled.p`
-    font-size: 15px;
-    color: ${({ theme }) => theme.colors.text.disabled};
-    text-align: center;
-    margin-bottom: 32px;
-`;
-
-const Form = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-`;
-
-const InputGroup = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const Label = styled.label`
-    font-size: 14px;
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const Input = styled.input<{ $hasError?: boolean }>`
-    width: 100%;
-    padding: 12px 16px;
-    background-color: ${({ theme }) => theme.colors.background.default};
-    border: 1px solid
-        ${({ theme, $hasError }) => ($hasError ? theme.colors.error : theme.colors.divider)};
-    border-radius: 8px;
-    font-size: 15px;
-    color: ${({ theme }) => theme.colors.text.default};
-    transition: all 0.2s ease;
-
-    &::placeholder {
-        color: ${({ theme }) => theme.colors.text.disabled};
-    }
-
-    &:focus {
-        outline: none;
-        border-color: ${({ theme, $hasError }) =>
-            $hasError ? theme.colors.error : theme.colors.primary};
-        /* 포커스 시 약간의 빛번짐 효과 */
-        box-shadow: 0 0 0 3px
-            ${({ theme, $hasError }) =>
-                $hasError ? `${theme.colors.error}20` : `${theme.colors.primary}20`};
-    }
-`;
-
-const ErrorMessage = styled.span`
-    font-size: 13px;
-    color: ${({ theme }) => theme.colors.error};
-    font-weight: 500;
-`;
-
-const SubmitButton = styled.button`
-    margin-top: 12px;
-    width: 100%;
-    padding: 14px;
-    background-color: ${({ theme }) => theme.colors.primary};
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-
-    &:hover:not(:disabled) {
-        filter: brightness(0.9);
-    }
-
-    &:active:not(:disabled) {
-        transform: scale(0.98);
-    }
-
-    &:disabled {
-        background-color: ${({ theme }) => theme.colors.text.disabled};
-        cursor: not-allowed;
-    }
-`;
-
-const RootErrorMessage = styled.div`
-    margin-top: 8px;
-    padding: 12px;
-    background-color: ${({ theme }) => `${theme.colors.error}`};
-    color: ${({ theme }) => theme.colors.error};
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-`;

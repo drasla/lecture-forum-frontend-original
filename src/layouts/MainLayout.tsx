@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
-import MainHeader from "../components/layouts/main/MainHeader.tsx";
-import MainFooter from "../components/layouts/main/MainFooter.tsx";
+import MainHeader from "../components/layout/main/MainHeader.tsx";
+import MainFooter from "../components/layout/main/MainFooter.tsx";
 import styled from "styled-components";
 
 const LayoutWrapper = styled.div`
