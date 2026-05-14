@@ -1,13 +1,10 @@
-import { Link, useNavigate } from "react-router"; // react-router-dom v6+ 최신 문법
+import { Link } from "react-router"; // react-router-dom v6+ 최신 문법
 import styled from "styled-components";
 import { FiSun, FiMoon, FiUser } from "react-icons/fi";
-import { IoChatbubbles } from "react-icons/io5"; // react-icons
-// import { useAuthStore } from "../../../store/useAuthStore";
-// import { useThemeStore } from "../../../store/useThemeStore";
+import { IoChatbubbles } from "react-icons/io5";
+import Button from "../../common/button/Button";
 
 function MainHeader() {
-    const navigate = useNavigate();
-
     // TODO: Zustand 스토어 연동 (지금은 임시 상태로 둡니다)
     const isLogin = false;
     const themeMode = "light";
@@ -26,26 +23,38 @@ function MainHeader() {
                 {/* 2. 네비게이션 및 우측 메뉴 영역 */}
                 <NavGroup>
                     {/* 다크모드 토글 버튼 */}
-                    <IconButton onClick={toggleTheme} aria-label="테마 변경">
+                    <Button
+                        color={"primary"}
+                        variant={"icon"}
+                        onClick={toggleTheme}
+                        aria-label="테마 변경">
                         {themeMode === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
-                    </IconButton>
+                    </Button>
 
                     {/* 로그인 상태에 따른 버튼 분기 */}
                     {isLogin ? (
                         <>
-                            <IconButton as={Link} to="/profile" aria-label="내 정보">
+                            <Button color="primary" variant={"icon"} as={Link} to={"/profile"}>
                                 <FiUser size={20} />
-                            </IconButton>
+                            </Button>
                             {/*<TextButton onClick={logout}>로그아웃</TextButton>*/}
                         </>
                     ) : (
                         <>
-                            <TextButton as={Link} to="/auth/signIn">
+                            <Button
+                                color={"primary"}
+                                variant={"text"}
+                                as={Link}
+                                to={"/auth/signin"}>
                                 로그인
-                            </TextButton>
-                            <PrimaryButton onClick={() => navigate("/auth/signUp")}>
+                            </Button>
+                            <Button
+                                color={"primary"}
+                                variant={"contained"}
+                                as={Link}
+                                to={"/auth/signup"}>
                                 회원가입
-                            </PrimaryButton>
+                            </Button>
                         </>
                     )}
                 </NavGroup>
@@ -101,52 +110,4 @@ const NavGroup = styled.div`
     display: flex;
     align-items: center;
     gap: 16px;
-`;
-
-const IconButton = styled.button`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 50%;
-    color: ${({ theme }) => theme.colors.text.default};
-    transition: background-color 0.2s ease;
-
-    &:hover {
-        background-color: ${({ theme }) => theme.colors.background.default};
-    }
-`;
-
-const TextButton = styled(Link)`
-    font-size: 14px;
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.text.default};
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-        background-color: ${({ theme }) => theme.colors.background.default};
-    }
-`;
-
-const PrimaryButton = styled.button`
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff; /* 버튼 글자는 무조건 흰색 */
-    background-color: ${({ theme }) => theme.colors.primary};
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition:
-        background-color 0.2s ease,
-        transform 0.1s ease;
-
-    &:hover {
-        /* CSS filter를 쓰면 테마 색상을 유지하면서 살짝 어둡게 만들기 편합니다 */
-        filter: brightness(0.9);
-    }
-
-    &:active {
-        transform: scale(0.98);
-    }
 `;

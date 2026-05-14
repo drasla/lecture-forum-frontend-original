@@ -3,7 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import styled from "styled-components";
 import { type SignUpInputType, signUpSchema } from "../../../schemas/auth/signUpSchema.ts";
-// import api from "../../../api/axiosInstance"; // TODO: 실제 API 호출 시 주석 해제
+import * as axios from "axios";
+import axiosInstance from "../../../api/axiosInstance.ts";
 
 function SignUpPage() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ function SignUpPage() {
     const {
         register,
         handleSubmit,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<SignUpInputType>({
         resolver: zodResolver(signUpSchema),
@@ -23,18 +25,27 @@ function SignUpPage() {
         try {
             // 백엔드로 보낼 때는 passwordConfirm은 제외하고 보냅니다.
             const { passwordConfirm, ...submitData } = data;
-
-            console.log("제출할 데이터:", submitData);
-
-            // TODO: 실제 API 호출 로직
-            // await api.post("/users", submitData);
-
+            await axiosInstance.post("/user/create", submitData);
             alert("회원가입이 완료되었습니다! 로그인해주세요.");
             navigate("/auth/signIn");
-        } catch (error: any) {
-            // 백엔드에서 던진 중복 에러(409) 처리
-            const errorMessage = error.response?.data?.error || "회원가입 중 오류가 발생했습니다.";
-            alert(errorMessage);
+        } catch (error) {
+            console.log(error);
+
+            // 기본 에러 메세지를 미리 넣어서 errorMessage 마련
+            let errorMessage = "회원가입 중 오류가 발생했습니다.";
+
+            // 지금 catch된 error가 axios의 에러인지 판별
+            if (axios.isAxiosError(error)) {
+                // axios에서 발생된 에러라면, 백엔드에서 제공을 한 내용이 error.response.data.message에 존재
+                // 그 백엔드에서 전달해준 내용을 errorMessage에 저장
+                errorMessage = error.response?.data?.message || errorMessage;
+            } else if (error instanceof Error) {
+                // axios에서 발생한 에러가 아닌, 자바스크립트 표준 에러 객체라면
+                // error.message에 담긴 에러 내용을 errorMessage에 저장
+                errorMessage = error.message;
+            }
+
+            setError("root", { message: errorMessage });
         }
     };
 
@@ -121,6 +132,8 @@ function SignUpPage() {
                         />
                         {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
                     </InputGroup>
+
+                    {errors.root && <RootErrorMessage>{errors.root.message}</RootErrorMessage>}
 
                     <SubmitButton type="submit" disabled={isSubmitting}>
                         {isSubmitting ? "가입하는 중..." : "회원가입 완료"}
@@ -244,4 +257,15 @@ const SubmitButton = styled.button`
         background-color: ${({ theme }) => theme.colors.text.disabled};
         cursor: not-allowed;
     }
+`;
+
+const RootErrorMessage = styled.div`
+    margin-top: 8px;
+    padding: 12px;
+    background-color: ${({ theme }) => `${theme.colors.error}`};
+    color: ${({ theme }) => theme.colors.error};
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
 `;
