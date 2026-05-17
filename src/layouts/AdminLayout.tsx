@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router"; // react-router-dom v6+ / react-router v7
+import { Link, Outlet } from "react-router";
 import styled from "styled-components";
 import { FiGrid, FiUsers, FiSettings } from "react-icons/fi";
 
@@ -24,9 +24,10 @@ function AdminLayout() {
                 </SidebarMenu>
             </AdminSidebar>
 
-            {/* 우측 메인 콘텐츠 영역 (Outlet을 통해 하위 페이지들이 렌더링됨) */}
             <AdminMain>
-                <Outlet />
+                <AdminContentInner>
+                    <Outlet />
+                </AdminContentInner>
             </AdminMain>
         </AdminContainer>
     );
@@ -88,4 +89,10 @@ const AdminMain = styled.main`
     flex: 1;
     padding: 32px;
     overflow-y: auto;
+`;
+
+const AdminContentInner = styled.div`
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
 `;

@@ -6,6 +6,8 @@ import SignInPage from "../pages/auth/signIn/SignInPage.tsx";
 import { useAuthStore } from "../stores/auth/AuthStore.ts";
 import { Role } from "../types/user.type.ts";
 import AdminLayout from "../layouts/AdminLayout.tsx";
+import AdminCategoryListPage from "../pages/admin/category/AdminCategoryListPage.tsx";
+import AdminCategoryCreatePage from "../pages/admin/category/create/AdminCategoryCreatePage.tsx";
 
 const adminLoader = () => {
     const { isLoggedIn, user } = useAuthStore.getState();
@@ -50,9 +52,17 @@ const router = createBrowserRouter([
             },
             {
                 path: "category",
-                element: <div>카테고리 관리 페이지가 들어올 자리입니다.</div>,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminCategoryListPage />,
+                    },
+                    {
+                        path: "create",
+                        element: <AdminCategoryCreatePage />,
+                    },
+                ],
             },
-            // 추가될 어드민 페이지들...
         ],
     },
 ]);

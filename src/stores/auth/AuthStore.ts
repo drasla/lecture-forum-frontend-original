@@ -1,20 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GenderType, RoleType } from "../../types/user.type.ts";
-
-export interface User {
-    id: number | null;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    username: string | null;
-    name: string | null;
-    nickname: string | null;
-    email: string | null;
-    phoneNumber: string | null;
-    birthdate: Date | null;
-    gender: GenderType | null;
-    role: RoleType | null;
-}
+import type { User } from "../../types/user.type.ts";
 
 interface AuthState {
     isLoggedIn: boolean;
