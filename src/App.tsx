@@ -3,12 +3,13 @@ import { darkTheme, lightTheme } from "./styles/theme.ts";
 import { GlobalStyle } from "./styles/GlobalStyle.ts";
 import { RouterProvider } from "react-router";
 import GetRouter from "./router/getRouter.tsx";
+import { useThemeStore } from "./stores/theme/ThemeStore.ts";
 
 function App() {
-    const themeMode = "light";
+    const { theme } = useThemeStore();
 
     return (
-        <ThemeProvider theme={themeMode === "light" ? lightTheme : darkTheme}>
+        <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
             <GlobalStyle />
             <RouterProvider router={GetRouter} />
         </ThemeProvider>

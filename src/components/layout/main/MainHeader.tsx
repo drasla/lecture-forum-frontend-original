@@ -1,14 +1,13 @@
-import { Link } from "react-router"; // react-router-dom v6+ 최신 문법
+import { Link } from "react-router";
 import styled from "styled-components";
 import { FiSun, FiMoon, FiUser } from "react-icons/fi";
 import { IoChatbubbles } from "react-icons/io5";
 import Button from "../../common/button/Button";
+import { useThemeStore } from "../../../stores/theme/ThemeStore.ts";
 
 function MainHeader() {
-    // TODO: Zustand 스토어 연동 (지금은 임시 상태로 둡니다)
     const isLogin = false;
-    const themeMode = "light";
-    const toggleTheme = () => console.log("테마 변경");
+    const { theme, onChangeTheme } = useThemeStore();
     // const logout = () => console.log("로그아웃");
 
     return (
@@ -26,9 +25,9 @@ function MainHeader() {
                     <Button
                         color={"primary"}
                         variant={"icon"}
-                        onClick={toggleTheme}
+                        onClick={onChangeTheme}
                         aria-label="테마 변경">
-                        {themeMode === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
+                        {theme === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
                     </Button>
 
                     {/* 로그인 상태에 따른 버튼 분기 */}
