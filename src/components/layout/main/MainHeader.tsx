@@ -4,11 +4,11 @@ import { FiSun, FiMoon, FiUser } from "react-icons/fi";
 import { IoChatbubbles } from "react-icons/io5";
 import Button from "../../common/button/Button";
 import { useThemeStore } from "../../../stores/theme/ThemeStore.ts";
+import { useAuthStore } from "../../../stores/auth/AuthStore.ts";
 
 function MainHeader() {
-    const isLogin = false;
     const { theme, onChangeTheme } = useThemeStore();
-    // const logout = () => console.log("로그아웃");
+    const { isLoggedIn, logout } = useAuthStore();
 
     return (
         <HeaderContainer>
@@ -31,12 +31,14 @@ function MainHeader() {
                     </Button>
 
                     {/* 로그인 상태에 따른 버튼 분기 */}
-                    {isLogin ? (
+                    {isLoggedIn ? (
                         <>
                             <Button color="primary" variant={"icon"} as={Link} to={"/profile"}>
                                 <FiUser size={20} />
                             </Button>
-                            {/*<TextButton onClick={logout}>로그아웃</TextButton>*/}
+                            <Button color={"error"} variant={"contained"} onClick={logout}>
+                                로그아웃
+                            </Button>
                         </>
                     ) : (
                         <>

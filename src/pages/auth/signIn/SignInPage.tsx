@@ -33,7 +33,7 @@ function SignInPage() {
     const onSubmit = async (data: SignInInputType) => {
         try {
             // 💡 1. 백엔드 라우터 구조에 맞춰 /users/login 으로 POST 요청을 보냅니다.
-            const response = await axiosInstance.post("/users/login", data);
+            const response = await axiosInstance.post("/user/login", data);
 
             // 💡 2. 컨트롤러에서 res.status(200).json({ message, data: { user, token } }) 형태로 보낸 데이터 추출
             const { token, user } = response.data.data;
@@ -88,6 +88,7 @@ function SignInPage() {
                         type="submit"
                         disabled={isSubmitting}
                         variant={"contained"}
+                        color={"primary"}
                         fullWidth={true}>
                         {isSubmitting ? "로그인 중..." : "로그인"}
                     </Button>

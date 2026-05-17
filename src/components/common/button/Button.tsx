@@ -9,6 +9,10 @@ const StyledButton = styled.button<{
     $variant?: ButtonVariantType;
     $fullWidth?: boolean;
 }>`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: ${props => (props.$variant === "icon" ? "1" : "auto")};
     width: ${props => (props.$fullWidth ? "100%" : "auto")};
     font-size: 14px;
     font-weight: 600;

@@ -14,6 +14,7 @@ import {
 } from "../../../components/auth/auth.style.tsx";
 import InputGroup from "../../../components/common/input/InputGroup.tsx";
 import Button from "../../../components/common/button/Button.tsx";
+import SelectGroup from "../../../components/common/select/SelectGroup.tsx";
 
 function SignUpPage() {
     const navigate = useNavigate();
@@ -134,6 +135,16 @@ function SignUpPage() {
                         type={"date"}
                     />
 
+                    <SelectGroup
+                        id="gender"
+                        label="성별"
+                        errorMessage={errors.gender?.message}
+                        registerObj={register("gender")}>
+                        <option value="">성별을 선택해주세요</option>
+                        <option value="MALE">남성</option>
+                        <option value="FEMALE">여성</option>
+                    </SelectGroup>
+
                     {errors.root && (
                         <AuthRootErrorMessage>{errors.root.message}</AuthRootErrorMessage>
                     )}
@@ -141,9 +152,10 @@ function SignUpPage() {
                     <Button
                         fullWidth={true}
                         variant={"contained"}
-                        type="submit"
+                        color={"primary"}
+                        type={"submit"}
                         disabled={isSubmitting}>
-                        {isSubmitting ? "가입하는 중..." : "회원가입 완료"}
+                        {isSubmitting ? "가입하는 중..." : "회원가입"}
                     </Button>
                 </AuthForm>
             </AuthFormCard>
