@@ -1,14 +1,15 @@
 import { Link } from "react-router";
 import styled from "styled-components";
-import { FiSun, FiMoon, FiUser } from "react-icons/fi";
+import { FiSun, FiMoon, FiUser, FiSettings } from "react-icons/fi";
 import { IoChatbubbles } from "react-icons/io5";
 import Button from "../../common/button/Button";
 import { useThemeStore } from "../../../stores/theme/ThemeStore.ts";
 import { useAuthStore } from "../../../stores/auth/AuthStore.ts";
+import { Role } from "../../../types/user.type.ts";
 
 function MainHeader() {
     const { theme, onChangeTheme } = useThemeStore();
-    const { isLoggedIn, logout } = useAuthStore();
+    const { user, isLoggedIn, logout } = useAuthStore();
 
     return (
         <HeaderContainer>
@@ -36,6 +37,11 @@ function MainHeader() {
                             <Button color="primary" variant={"icon"} as={Link} to={"/profile"}>
                                 <FiUser size={20} />
                             </Button>
+                            {user?.role === Role.ADMIN && (
+                                <Button color="primary" variant={"icon"} as={Link} to={"/admin"}>
+                                    <FiSettings size={20} />
+                                </Button>
+                            )}
                             <Button color={"error"} variant={"contained"} onClick={logout}>
                                 로그아웃
                             </Button>
