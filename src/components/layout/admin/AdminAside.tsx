@@ -10,8 +10,8 @@ const adminNavList = [
         icon: <FiGrid size={18} />,
     },
     {
-        id: "users",
-        path: "/admin/users",
+        id: "user",
+        path: "/admin/user",
         label: "유저 관리",
         icon: <FiUsers size={18} />,
     },

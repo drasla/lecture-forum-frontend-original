@@ -26,6 +26,16 @@ const adminLoader = () => {
     return null; // 통과!
 };
 
+const guestLoader = () => {
+    const { isLoggedIn } = useAuthStore.getState();
+
+    if (isLoggedIn) {
+        return redirect("/");
+    }
+
+    return null;
+};
+
 const router = createBrowserRouter([
     {
         element: <MainLayout />,
@@ -34,6 +44,7 @@ const router = createBrowserRouter([
             { index: true, element: <HomePage /> },
             {
                 path: "auth",
+                loader: guestLoader,
                 children: [
                     { path: "signUp", element: <SignUpPage /> },
                     { path: "signIn", element: <SignInPage /> },
@@ -43,11 +54,10 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <AdminLayout />, // 💡 관리자용 전용 레이아웃
-        loader: adminLoader, // 💡 여기서 권한이 없으면 튕겨냅니다
+        element: <AdminLayout />,
+        loader: adminLoader,
         children: [
             {
-                // /admin으로 들어왔을 때 기본으로 보여줄 화면 (예: 카테고리로 바로 리다이렉트)
                 index: true,
                 loader: () => redirect("/admin/category"),
             },

@@ -5,6 +5,14 @@ import Button from "../../../components/common/button/Button";
 import type { Category } from "../../../types/category.type.ts";
 import adminCategoryApi from "../../../api/admin/adminCategoryApi.ts";
 import { FiEdit, FiRefreshCcw, FiTrash2 } from "react-icons/fi";
+import {
+    AdminContainer,
+    AdminLoadingText,
+    AdminPageHeader,
+    AdminTitle,
+} from "../../../components/admin/admin.style.tsx";
+import Badge from "../../../components/common/badge/Badge.tsx";
+import Card from "../../../components/common/card/Card.tsx";
 
 function AdminCategoryListPage() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -51,17 +59,17 @@ function AdminCategoryListPage() {
     };
 
     return (
-        <Container>
-            <PageHeader>
-                <Title>카테고리 관리</Title>
+        <AdminContainer>
+            <AdminPageHeader>
+                <AdminTitle>카테고리 관리</AdminTitle>
                 <Button variant="contained" color="primary" as={Link} to="/admin/category/create">
                     + 카테고리 추가
                 </Button>
-            </PageHeader>
+            </AdminPageHeader>
 
             <Card>
                 {isLoading ? (
-                    <LoadingText>불러오는 중...</LoadingText>
+                    <AdminLoadingText>불러오는 중...</AdminLoadingText>
                 ) : (
                     <TableWrapper>
                         <Table>
@@ -90,9 +98,14 @@ function AdminCategoryListPage() {
                                                 <strong>{cat.name}</strong>
                                             </Td>
                                             <Td>
-                                                <StatusBadge $status={cat.status}>
+                                                <Badge
+                                                    color={
+                                                        cat.status === "ACTIVE"
+                                                            ? "primary"
+                                                            : "default"
+                                                    }>
                                                     {cat.status === "ACTIVE" ? "활성" : "비활성"}
-                                                </StatusBadge>
+                                                </Badge>
                                             </Td>
                                             <Td>
                                                 <ButtonGroup>
@@ -101,8 +114,7 @@ function AdminCategoryListPage() {
                                                         color="primary"
                                                         title="수정"
                                                         as={Link}
-                                                        to={`/admin/category/edit/${cat.id}`}
-                                                    >
+                                                        to={`/admin/category/edit/${cat.id}`}>
                                                         <FiEdit size={18} />
                                                     </Button>
                                                     <Button
@@ -136,41 +148,11 @@ function AdminCategoryListPage() {
                     </TableWrapper>
                 )}
             </Card>
-        </Container>
+        </AdminContainer>
     );
 }
 
 export default AdminCategoryListPage;
-
-// --- Styled Components ---
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
-`;
-
-const PageHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-`;
-
-const Title = styled.h2`
-    font-size: 24px;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const Card = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.paper};
-    border: 1px solid ${({ theme }) => theme.colors.divider};
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-`;
 
 const TableWrapper = styled.div`
     overflow-x: auto;
@@ -204,22 +186,4 @@ const ButtonGroup = styled.div`
     display: flex;
     gap: 8px;
     align-items: center;
-`;
-
-const LoadingText = styled.div`
-    text-align: center;
-    padding: 40px;
-    color: ${({ theme }) => theme.colors.text.disabled};
-`;
-
-const StatusBadge = styled.span<{ $status: string }>`
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    background-color: ${({ theme, $status }) =>
-        $status === "ACTIVE" ? `${theme.colors.primary}20` : theme.colors.divider};
-    color: ${({ theme, $status }) =>
-        $status === "ACTIVE" ? theme.colors.primary : theme.colors.text.disabled};
 `;

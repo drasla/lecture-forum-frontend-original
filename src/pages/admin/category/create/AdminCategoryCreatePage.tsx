@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as axios from "axios";
@@ -10,6 +9,14 @@ import {
     adminCreateCategorySchema,
 } from "../../../../schemas/admin/category/adminCreateCategorySchema.ts";
 import adminCategoryApi from "../../../../api/admin/adminCategoryApi.ts";
+import {
+    AdminButtonGroup,
+    AdminContainer,
+    AdminForm,
+    AdminPageHeader,
+    AdminTitle,
+} from "../../../../components/admin/admin.style.tsx";
+import Card from "../../../../components/common/card/Card.tsx";
 
 function AdminCategoryCreatePage() {
     const navigate = useNavigate();
@@ -38,13 +45,13 @@ function AdminCategoryCreatePage() {
     };
 
     return (
-        <Container>
-            <PageHeader>
-                <Title>새 카테고리 추가</Title>
-            </PageHeader>
+        <AdminContainer>
+            <AdminPageHeader>
+                <AdminTitle>새 카테고리 추가</AdminTitle>
+            </AdminPageHeader>
 
             <Card>
-                <Form onSubmit={handleSubmit(onSubmit)}>
+                <AdminForm onSubmit={handleSubmit(onSubmit)}>
                     <InputGroup
                         id="categoryName"
                         label="카테고리명"
@@ -53,7 +60,7 @@ function AdminCategoryCreatePage() {
                         registerObj={register("name")}
                     />
 
-                    <ButtonGroup>
+                    <AdminButtonGroup>
                         <Button
                             type="button"
                             variant="text"
@@ -69,50 +76,11 @@ function AdminCategoryCreatePage() {
                             disabled={isSubmitting}>
                             {isSubmitting ? "추가 중..." : "추가하기"}
                         </Button>
-                    </ButtonGroup>
-                </Form>
+                    </AdminButtonGroup>
+                </AdminForm>
             </Card>
-        </Container>
+        </AdminContainer>
     );
 }
 
 export default AdminCategoryCreatePage;
-
-// --- Styled Components ---
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
-`;
-
-const PageHeader = styled.div`
-    margin-bottom: 8px;
-`;
-
-const Title = styled.h2`
-    font-size: 24px;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const Card = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.paper};
-    border: 1px solid ${({ theme }) => theme.colors.divider};
-    border-radius: 12px;
-    padding: 32px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-`;
-
-const Form = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-`;

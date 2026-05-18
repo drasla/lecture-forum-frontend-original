@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as axios from "axios";
@@ -11,6 +10,15 @@ import {
 import adminCategoryApi from "../../../../api/admin/adminCategoryApi.ts";
 import InputGroup from "../../../../components/common/input/InputGroup.tsx";
 import Button from "../../../../components/common/button/Button.tsx";
+import {
+    AdminButtonGroup,
+    AdminContainer,
+    AdminForm,
+    AdminLoadingText,
+    AdminPageHeader,
+    AdminTitle,
+} from "../../../../components/admin/admin.style.tsx";
+import Card from "../../../../components/common/card/Card.tsx";
 
 function AdminCategoryUpdatePage() {
     const { id } = useParams<{ id: string }>(); // URL에서 ID 추출
@@ -62,16 +70,16 @@ function AdminCategoryUpdatePage() {
     };
 
     return (
-        <Container>
-            <PageHeader>
-                <Title>카테고리 수정</Title>
-            </PageHeader>
+        <AdminContainer>
+            <AdminPageHeader>
+                <AdminTitle>카테고리 수정</AdminTitle>
+            </AdminPageHeader>
 
             <Card>
                 {isLoading ? (
-                    <LoadingText>데이터를 불러오는 중...</LoadingText>
+                    <AdminLoadingText>데이터를 불러오는 중...</AdminLoadingText>
                 ) : (
-                    <Form onSubmit={handleSubmit(onSubmit)}>
+                    <AdminForm onSubmit={handleSubmit(onSubmit)}>
                         <InputGroup
                             id="categoryName"
                             label="카테고리명"
@@ -80,7 +88,7 @@ function AdminCategoryUpdatePage() {
                             registerObj={register("name")}
                         />
 
-                        <ButtonGroup>
+                        <AdminButtonGroup>
                             <Button
                                 type="button"
                                 variant="text"
@@ -96,57 +104,12 @@ function AdminCategoryUpdatePage() {
                                 disabled={isSubmitting}>
                                 {isSubmitting ? "수정 중..." : "수정 완료"}
                             </Button>
-                        </ButtonGroup>
-                    </Form>
+                        </AdminButtonGroup>
+                    </AdminForm>
                 )}
             </Card>
-        </Container>
+        </AdminContainer>
     );
 }
 
 export default AdminCategoryUpdatePage;
-
-// --- Styled Components ---
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
-`;
-
-const PageHeader = styled.div`
-    margin-bottom: 8px;
-`;
-
-const Title = styled.h2`
-    font-size: 24px;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const Card = styled.div`
-    background-color: ${({ theme }) => theme.colors.background.paper};
-    border: 1px solid ${({ theme }) => theme.colors.divider};
-    border-radius: 12px;
-    padding: 32px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-`;
-
-const Form = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-`;
-
-const LoadingText = styled.div`
-    text-align: center;
-    padding: 40px;
-    color: ${({ theme }) => theme.colors.text.disabled};
-`;
