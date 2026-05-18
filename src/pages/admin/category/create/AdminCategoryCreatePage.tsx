@@ -1,17 +1,15 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import * as axios from "axios";
 import { useNavigate, Link } from "react-router";
-import { createCategory } from "../../../../api/admin/categoryApi.ts";
 import InputGroup from "../../../../components/common/input/InputGroup.tsx";
 import Button from "../../../../components/common/button/Button.tsx";
-
-const categorySchema = z.object({
-    name: z.string().min(1, "카테고리명을 입력해주세요.").max(50, "50자를 초과할 수 없습니다."),
-});
-type CategoryFormType = z.infer<typeof categorySchema>;
+import {
+    type AdminCreateCategoryInputType,
+    adminCreateCategorySchema,
+} from "../../../../schemas/admin/category/adminCreateCategorySchema.ts";
+import adminCategoryApi from "../../../../api/admin/adminCategoryApi.ts";
 
 function AdminCategoryCreatePage() {
     const navigate = useNavigate();
@@ -21,15 +19,15 @@ function AdminCategoryCreatePage() {
         handleSubmit,
         setError,
         formState: { errors, isSubmitting },
-    } = useForm<CategoryFormType>({
-        resolver: zodResolver(categorySchema),
+    } = useForm<AdminCreateCategoryInputType>({
+        resolver: zodResolver(adminCreateCategorySchema),
     });
 
-    const onSubmit = async (data: CategoryFormType) => {
+    const onSubmit = async (data: AdminCreateCategoryInputType) => {
         try {
-            await createCategory(data.name);
+            await adminCategoryApi.createCategory(data.name);
             alert("카테고리가 성공적으로 추가되었습니다.");
-            navigate("/admin/category"); // 💡 추가 완료 시 목록으로 자동 이동
+            navigate("/admin/category");
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 409) {
                 setError("name", { message: "이미 존재하는 카테고리명입니다." });
