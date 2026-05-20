@@ -16,6 +16,7 @@ export interface User {
     id: number | null;
     createdAt: Date | null;
     updatedAt: Date | null;
+    deletedAt?: Date | null;
     username: string | null;
     name: string | null;
     nickname: string | null;
