@@ -13,16 +13,16 @@ export const Role = {
 export type RoleType = (typeof Role)[keyof typeof Role];
 
 export interface User {
-    id: number | null;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    deletedAt?: Date | null;
-    username: string | null;
-    name: string | null;
-    nickname: string | null;
-    email: string | null;
-    phoneNumber: string | null;
-    birthdate: Date | null;
-    gender: GenderType | null;
-    role: RoleType | null;
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt?: string;
+    username: string;
+    name: string;
+    nickname: string;
+    email: string;
+    phoneNumber?: string;
+    birthdate?: string | null;
+    gender: GenderType;
+    role: RoleType;
 }

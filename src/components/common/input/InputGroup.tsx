@@ -1,39 +1,23 @@
-import styled from "styled-components";
-import type { InputHTMLAttributes } from "react";
-import type { UseFormRegisterReturn } from "react-hook-form";
 import Input from "./Input.tsx";
+import type { UseFormRegisterReturn } from "react-hook-form";
+import type { InputHTMLAttributes } from "react";
+import { ErrorMessage, Label, StyledInputGroup } from "../group/Group.tsx";
 
-const StyledInputGroup = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const StyledLabel = styled.label`
-    font-size: 14px;
-    font-weight: 600;
-    color: ${props => props.theme.colors.text.default};
-`;
-
-const StyledErrorMessage = styled.span`
-    font-size: 13px;
-    color: ${({ theme }) => theme.colors.error};
-    font-weight: 500;
-`;
-
+// 우리가 만든 InputGroup이 input 태그의 확장판이다
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
-    id: string;
     label?: string;
+    id?: string;
     errorMessage?: string;
     registerObj?: UseFormRegisterReturn;
+    wrap?: boolean;
 }
 
-function InputGroup({ id, label, errorMessage, registerObj, ...props }: Props) {
+function InputGroup({ label, id, errorMessage, registerObj, wrap, ...props }: Props) {
     return (
-        <StyledInputGroup>
-            {label && <StyledLabel htmlFor={id}>{label}</StyledLabel>}
-            <Input $hasError={!!errorMessage} {...props} {...registerObj} />
-            {errorMessage && <StyledErrorMessage>{errorMessage}</StyledErrorMessage>}
+        <StyledInputGroup $wrap={wrap}>
+            {label && <Label htmlFor={id}>{label}</Label>}
+            <Input id={id} $hasError={!!errorMessage} {...registerObj} {...props} />
+            {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </StyledInputGroup>
     );
 }

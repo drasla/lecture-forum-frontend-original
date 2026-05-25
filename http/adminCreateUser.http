@@ -1,0 +1,16 @@
+@baseUrl =
+@token =
+### 더미 유저 생성
+POST {{baseUrl}}/admin/user/create
+COntent-Type: application/json
+Authorization: Bearer {{token}}}
+
+{
+  "username": "dummy_{{$timestamp}}",
+  "password": "password123",
+  "name": "테스트유저",
+  "nickname": "더미_{{$timestamp}}",
+  "email": "dummy_{{$timestamp}}@test.com",
+  "gender": "MALE",
+  "role": "USER"
+}

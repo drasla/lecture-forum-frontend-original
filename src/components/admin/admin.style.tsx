@@ -17,32 +17,17 @@ export const AdminPageHeader = styled.div`
 export const AdminTitle = styled.h2`
     font-size: 24px;
     font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.default};
-`;
-
-export const AdminForm = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-`;
-
-// 💡 활용도를 높이기 위해 정렬 방향을 prop으로 받을 수 있게 개선했습니다.
-export const AdminButtonGroup = styled.div<{ $align?: "left" | "center" | "right" }>`
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: ${({ $align = "right" }) =>
-    $align === "right" ? "flex-end" : $align === "center" ? "center" : "flex-start"};
 `;
 
 export const AdminLoadingText = styled.div`
     text-align: center;
     padding: 40px;
-    color: ${({ theme }) => theme.colors.text.disabled};
+    color: ${props => props.theme.colors.text.disabled};
 `;
 
+// PC에서는 상관 없는데, 모바일 때문에 한 번 테이블을 감싸는 것
 export const AdminTableWrapper = styled.div`
-    overflow-x: auto;
+    overflow-x: auto; // X축 방향으로 스크롤바를 허용하겠다
 `;
 
 export const AdminTable = styled.table`
@@ -51,20 +36,36 @@ export const AdminTable = styled.table`
 `;
 
 export const AdminTh = styled.th<{ $width?: string }>`
-    width: ${({ $width }) => $width || "auto"};
+    width: ${props => props.$width};
     text-align: left;
     padding: 12px 16px;
-    background-color: ${({ theme }) => theme.colors.background.default};
-    color: ${({ theme }) => theme.colors.text.disabled};
+    background-color: ${props => props.theme.colors.background.default};
+    color: ${props => props.theme.colors.text.disabled};
     font-size: 13px;
     font-weight: 600;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.divider};
+    border-bottom: 2px solid ${props => props.theme.colors.divider};
 `;
 
 export const AdminTd = styled.td`
+    // td는 flex를 쓸 수 없음
+    // 그 안에 들어가는 요소에 대한 정렬은 text-align과 vertical-align을 통해서 해야 함
     padding: 16px;
     font-size: 14px;
-    color: ${({ theme }) => theme.colors.text.default};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.divider};
+    border-bottom: 1px solid ${props => props.theme.colors.divider};
     vertical-align: middle;
+`;
+
+export const AdminForm = styled.form<{ $wrap?: boolean }>`
+    display: flex;
+    flex-direction: ${props => (props.$wrap ? "row" : "column")};
+    flex-wrap: ${props => (props.$wrap ? "wrap" : "nowrap")};
+    gap: 32px;
+`;
+
+export const AdminButtonGroup = styled.div<{ $align?: "left" | "right" | "center" }>`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: ${({ $align = "right" }) =>
+        $align === "right" ? "flex-end" : $align === "center" ? "center" : "flex-start"};
 `;

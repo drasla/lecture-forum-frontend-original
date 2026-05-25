@@ -64,7 +64,7 @@ function AdminUserListPage() {
         <AdminContainer>
             <AdminPageHeader>
                 <AdminTitle>유저 관리</AdminTitle>
-                <Button variant="contained" color="primary" as={Link} to="/admin/users/create">
+                <Button variant="contained" color="primary" as={Link} to="/admin/user/create">
                     + 유저 추가
                 </Button>
             </AdminPageHeader>
@@ -143,7 +143,7 @@ function AdminUserListPage() {
                                                                 color="primary"
                                                                 title="수정"
                                                                 as={Link}
-                                                                to={`/admin/users/edit/${user.id}`}>
+                                                                to={`/admin/user/${user.id}`}>
                                                                 <FiEdit size={18} />
                                                             </Button>
                                                         )}
