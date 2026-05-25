@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router"; // react-router-dom이 아닌 react-router를 쓰시는 버전에 맞춤
+import { Link, useSearchParams } from "react-router"; // react-router-dom이 아닌 react-router를 쓰시는 버전에 맞춤
 import styled from "styled-components";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import type { User } from "../../../types/user.type"; // 💡 공통 타입 임포트
@@ -20,12 +20,15 @@ import {
 import adminUserApi from "../../../api/admin/adminUserApi.ts";
 
 function AdminUserListPage() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const size = 10;
+
+    const pageParam = searchParams.get("page");
+    const page = pageParam ? Number(pageParam) : 1;
 
     const loadUsers = async (currentPage: number) => {
         setIsLoading(true);
@@ -39,6 +42,12 @@ function AdminUserListPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        // 기존 쿼리 스트링(검색어 등)이 있다면 유지하면서 page만 덮어씌웁니다.
+        searchParams.set("page", newPage.toString());
+        setSearchParams(searchParams);
     };
 
     useEffect(() => {
@@ -173,7 +182,7 @@ function AdminUserListPage() {
                                     variant="text"
                                     color="secondary"
                                     disabled={page === 1}
-                                    onClick={() => setPage(p => p - 1)}>
+                                    onClick={() => handlePageChange(page - 1)}>
                                     이전
                                 </Button>
                                 <PageInfo>
@@ -183,7 +192,7 @@ function AdminUserListPage() {
                                     variant="text"
                                     color="secondary"
                                     disabled={page === totalPages}
-                                    onClick={() => setPage(p => p + 1)}>
+                                    onClick={() => handlePageChange(page + 1)}>
                                     다음
                                 </Button>
                             </PaginationWrapper>
