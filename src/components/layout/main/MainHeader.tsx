@@ -6,10 +6,28 @@ import Button from "../../common/button/Button";
 import { useThemeStore } from "../../../stores/theme/ThemeStore.ts";
 import { useAuthStore } from "../../../stores/auth/AuthStore.ts";
 import { Role } from "../../../types/user.type.ts";
+import { useEffect, useState } from "react";
+import type { Category } from "../../../types/category.type.ts";
+import categoryApi from "../../../api/user/categoryApi.ts";
 
 function MainHeader() {
     const { theme, onChangeTheme } = useThemeStore();
     const { user, isLoggedIn, logout } = useAuthStore();
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                // 💡 방금 만든 ACTIVE 카테고리만 가져오는 API 호출
+                const data = await categoryApi.fetchActiveCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error("카테고리를 불러오는데 실패했습니다.", error);
+            }
+        };
+
+        loadCategories().then(() => {});
+    },[]);
 
     return (
         <HeaderContainer>
@@ -19,6 +37,14 @@ function MainHeader() {
                     <IoChatbubbles size={28} />
                     <span>토론대난투</span>
                 </Logo>
+
+                <Nav>
+                    {categories.map(category => (
+                        <NavItem key={category.id} to={`/category/${category.id}`}>
+                            {category.name}
+                        </NavItem>
+                    ))}
+                </Nav>
 
                 {/* 2. 네비게이션 및 우측 메뉴 영역 */}
                 <NavGroup>
@@ -106,6 +132,7 @@ const Logo = styled(Link)`
     font-weight: 800;
     color: ${({ theme }) => theme.colors.primary};
     letter-spacing: -0.5px;
+    margin-right: 60px;
 
     /* 아이콘 색상도 로고 글자색과 동일하게 맞춥니다 */
     svg {
@@ -117,4 +144,23 @@ const NavGroup = styled.div`
     display: flex;
     align-items: center;
     gap: 16px;
+`;
+
+const Nav = styled.nav`
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex: 1;
+`;
+
+const NavItem = styled(Link)`
+    font-size: 16px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.text.default};
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+        color: ${({ theme }) => theme.colors.primary};
+    }
 `;
