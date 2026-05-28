@@ -12,6 +12,11 @@ const fetchPostListByCategory = async (
     return response.data.data;
 };
 
+const fetchPostById = async (id: number): Promise<Post> => {
+    const response = await axiosInstance.get(`/post/${id}`);
+    return response.data.data;
+};
+
 const createPost = async (categoryId: number, input: CreatePostInputType): Promise<Post> => {
     const body = {
         ...input,
@@ -21,7 +26,13 @@ const createPost = async (categoryId: number, input: CreatePostInputType): Promi
     return response.data.data;
 };
 
+const votePost = async (postId: number, option: number): Promise<void> => {
+    await axiosInstance.post(`/post/${postId}/vote`, { option });
+};
+
 export default {
     fetchPostListByCategory,
+    fetchPostById,
     createPost,
+    votePost,
 };

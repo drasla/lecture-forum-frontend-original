@@ -11,7 +11,6 @@ import {
     createPostSchema,
     type CreatePostInputType,
 } from "../../../schemas/post/createPostSchema.ts";
-// 💡 한결 가벼워진 임포트 내역
 import {
     PostContainer,
     PostPageHeader,
@@ -79,7 +78,7 @@ function CreatePostPage() {
                 </PostTitle>
             </PostPageHeader>
 
-            <FormWrapper as="form" onSubmit={handleSubmit(onSubmit)}>
+            <FormWrapper onSubmit={handleSubmit(onSubmit)}>
                 <InputGroup
                     label="토론 제목"
                     id="title"

@@ -165,7 +165,7 @@ export const DetailContent = styled.div`
 // 4. 게시글/문의 작성 폼 (Form)
 // ==========================================
 
-export const FormWrapper = styled.div`
+export const FormWrapper = styled.form`
     background-color: ${({ theme }) => theme.colors.background.paper};
     border-radius: 8px;
     border: 1px solid ${({ theme }) => theme.colors.divider};
