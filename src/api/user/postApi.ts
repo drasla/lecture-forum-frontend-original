@@ -30,9 +30,14 @@ const votePost = async (postId: number, option: number): Promise<void> => {
     await axiosInstance.post(`/post/${postId}/vote`, { option });
 };
 
+const cancelVotePost = async (postId: number): Promise<void> => {
+    await axiosInstance.delete(`/post/${postId}/vote`);
+};
+
 export default {
     fetchPostListByCategory,
     fetchPostById,
     createPost,
     votePost,
+    cancelVotePost,
 };

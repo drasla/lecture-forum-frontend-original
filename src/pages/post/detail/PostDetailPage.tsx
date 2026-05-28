@@ -16,7 +16,7 @@ import {
     ButtonGroup,
     LoadingText,
 } from "../../../components/post/post.style.tsx";
-import { LuDroplets, LuFlame } from "react-icons/lu";
+import { LuDroplets, LuFlame, LuRotateCcw } from "react-icons/lu";
 
 function PostDetailPage() {
     const navigate = useNavigate();
@@ -26,6 +26,7 @@ function PostDetailPage() {
     const [post, setPost] = useState<Post | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isVoting, setIsVoting] = useState(false);
+    const [isCanceling, setIsCanceling] = useState(false);
 
     const loadPost = useCallback(async () => {
         if (!id) return;
@@ -63,6 +64,22 @@ function PostDetailPage() {
             alert("투표 처리 중 오류가 발생했습니다.");
         } finally {
             setIsVoting(false);
+        }
+    };
+
+    const handleCancelVote = async () => {
+        if (!window.confirm("투표를 취소하고 다시 선택하시겠습니까?")) return;
+
+        setIsCanceling(true);
+        try {
+            await postApi.cancelVotePost(Number(id));
+            alert("투표가 취소되었습니다.");
+            await loadPost(); // 화면 갱신 (투표 버튼 다시 렌더링됨)
+        } catch (error) {
+            console.error("투표 취소 실패:", error);
+            alert("투표 취소 중 오류가 발생했습니다.");
+        } finally {
+            setIsCanceling(false);
         }
     };
 
@@ -145,6 +162,11 @@ function PostDetailPage() {
                                     </ResultBar>
                                 </ResultBarWrapper>
                                 <ResultText>소중한 한 표가 전황에 반영되었습니다!</ResultText>
+
+                                <RevoteButton onClick={handleCancelVote} disabled={isCanceling}>
+                                    <LuRotateCcw size={16} />
+                                    {isCanceling ? "취소 중..." : "다시 투표하기"}
+                                </RevoteButton>
                             </ResultSection>
                         ) : (
                             // ❎ 투표 전 시: 클릭 가능한 양진영 버튼 표시
@@ -355,4 +377,32 @@ const ResultText = styled.p`
     font-size: 14px;
     color: ${({ theme }) => theme.colors.secondary};
     margin: 8px 0 0 0;
+`;
+
+const RevoteButton = styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 16px auto 0 auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.secondary};
+    background-color: transparent;
+    border: 1px solid ${({ theme }) => theme.colors.divider};
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        color: ${({ theme }) => theme.colors.text.default};
+        border-color: ${({ theme }) => theme.colors.secondary};
+        background-color: ${({ theme }) => theme.colors.background.default};
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 `;
