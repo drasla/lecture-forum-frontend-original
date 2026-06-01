@@ -21,5 +21,5 @@ export interface Post {
         option2Count: number;
         totalCount: number;
         hasVoted: boolean; // 로그인 유저의 투표 참여 여부
-    };
+    } | null;
 }
