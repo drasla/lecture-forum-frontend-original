@@ -1,5 +1,6 @@
-const ADMIN_TOKEN = "";
-const API_URL = "http://localhost:8001/admin/user/create";
+import { BASE_URL, ADMIN_TOKEN } from "./config.js";
+
+const API_URL = `${BASE_URL}/admin/user/create`;
 
 async function generateUsers(count) {
     for (let i = 1; i <= count; i++) {
