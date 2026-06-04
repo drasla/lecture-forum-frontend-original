@@ -28,7 +28,7 @@ export const ReplyTitle = styled.h3`
     }
 `;
 
-export const ReplyForm = styled.form`
+export const StyledReplyForm = styled.form`
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -84,7 +84,7 @@ export const EmptyMessage = styled.div`
     font-size: 15px;
 `;
 
-export const ReplyItem = styled.div`
+export const StyledReplyItem = styled.div`
     padding: 24px 0;
     border-bottom: 1px solid ${({ theme }) => theme.colors.divider};
 
