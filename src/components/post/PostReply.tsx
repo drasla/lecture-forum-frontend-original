@@ -69,7 +69,12 @@ function PostReply({ postId }: Props) {
                 ) : (
                     /* 💡 2. 분리된 개별 댓글 아이템 렌더링 */
                     replies.map(reply => (
-                        <ReplyItem key={reply.id} reply={reply} onDelete={handleDelete} />
+                        <ReplyItem
+                            key={reply.id}
+                            reply={reply}
+                            onDelete={handleDelete}
+                            onRefresh={() => loadReplies(currentPage)}
+                        />
                     ))
                 )}
             </ReplyList>

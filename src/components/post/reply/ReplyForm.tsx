@@ -9,15 +9,21 @@ import {
 import replyApi from "../../../api/user/replyApi.ts";
 import { ReplyTextarea, StyledReplyForm } from "../reply.style.tsx";
 import Button from "../../common/button/Button.tsx";
+import { AdminButtonGroup } from "../../admin/admin.style.tsx";
 
 interface ReplyFormProps {
     postId: number;
-    onSuccess: () => Promise<void>; // 작성이 성공하면 실행할 콜백 (목록 새로고침)
+    replyId?: number;
+    initialContent?: string;
+    onCancel?: () => void;
+    onSuccess: () => Promise<void>;
 }
 
-function ReplyForm({ postId, onSuccess }: ReplyFormProps) {
+function ReplyForm({ postId, replyId, initialContent, onCancel, onSuccess }: ReplyFormProps) {
     const { isLoggedIn } = useAuthStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const isEditMode = !!replyId;
 
     const {
         register,
@@ -26,23 +32,31 @@ function ReplyForm({ postId, onSuccess }: ReplyFormProps) {
         formState: { errors },
     } = useForm<CreateReplyInputType>({
         resolver: zodResolver(createReplySchema),
-        defaultValues: { content: "" },
+        defaultValues: { content: initialContent || "" },
     });
 
     const onSubmit = async (data: CreateReplyInputType) => {
         if (!isLoggedIn) {
-            alert("댓글을 작성하려면 로그인이 필요합니다.");
+            alert("로그인이 필요합니다.");
             return;
         }
 
         setIsSubmitting(true);
         try {
-            await replyApi.createReply(postId, data.content.trim());
+            if (isEditMode) {
+                // 수정 모드 API 호출
+                await replyApi.updateReply(replyId, data.content.trim());
+            } else {
+                // 작성 모드 API 호출
+                await replyApi.createReply(postId, data.content.trim());
+            }
             reset();
-            await onSuccess(); // 부모 컴포넌트의 loadReplies(1) 실행
+
+            if (onCancel) onCancel();
+            await onSuccess();
         } catch (error) {
-            console.error("댓글 작성 실패:", error);
-            alert("댓글 작성 중 오류가 발생했습니다.");
+            console.error(`댓글 ${isEditMode ? "수정" : "작성"} 실패:`, error);
+            alert(`댓글 ${isEditMode ? "수정" : "작성"} 중 오류가 발생했습니다.`);
         } finally {
             setIsSubmitting(false);
         }
@@ -58,15 +72,34 @@ function ReplyForm({ postId, onSuccess }: ReplyFormProps) {
                 }
                 disabled={!isLoggedIn || isSubmitting}
                 $hasError={!!errors.content}
+                autoFocus={isEditMode}
                 {...register("content")}
             />
-            <Button
-                type="submit"
-                color="primary"
-                variant="contained"
-                disabled={!isLoggedIn || isSubmitting}>
-                {isSubmitting ? "등록 중..." : "댓글 등록"}
-            </Button>
+            <AdminButtonGroup>
+                {isEditMode && onCancel && (
+                    <Button
+                        type="button"
+                        color="secondary"
+                        variant="contained"
+                        onClick={onCancel}
+                        disabled={isSubmitting}>
+                        취소
+                    </Button>
+                )}
+                <Button
+                    type="submit"
+                    color="primary"
+                    variant="contained"
+                    disabled={!isLoggedIn || isSubmitting}>
+                    {isSubmitting
+                        ? isEditMode
+                            ? "저장 중..."
+                            : "등록 중..."
+                        : isEditMode
+                          ? "수정 완료"
+                          : "댓글 등록"}
+                </Button>
+            </AdminButtonGroup>
         </StyledReplyForm>
     );
 }

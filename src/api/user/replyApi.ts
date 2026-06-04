@@ -21,6 +21,10 @@ const createReply = async (postId: number, content: string): Promise<Reply> => {
     return response.data.data;
 };
 
+const updateReply = async (id: number, content: string): Promise<void> => {
+    await axiosInstance.patch(`/reply/${id}`, { content });
+};
+
 const deleteReply = async (id: number): Promise<void> => {
     await axiosInstance.delete(`/reply/${id}`);
 };
@@ -28,5 +32,6 @@ const deleteReply = async (id: number): Promise<void> => {
 export default {
     getReplies,
     createReply,
+    updateReply,
     deleteReply,
 };
