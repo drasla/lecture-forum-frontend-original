@@ -6,7 +6,7 @@ import postApi from "../../../api/user/postApi.ts";
 import { useAuthStore } from "../../../stores/auth/AuthStore.ts";
 import Button from "../../../components/common/button/Button.tsx";
 import InputGroup from "../../../components/common/input/InputGroup.tsx";
-import { StyledInputGroup, Label, ErrorMessage } from "../../../components/common/group/Group.tsx";
+import { ErrorMessage } from "../../../components/common/group/Group.tsx";
 import {
     createPostSchema,
     type CreatePostInputType,
@@ -16,14 +16,14 @@ import {
     PostPageHeader,
     PostTitle,
     FormWrapper,
-    FormTextarea,
     FormDivider,
     VoteSectionTitle,
     VoteSectionDescription,
     VoteFieldsFlex,
-    ButtonGroup,
 } from "../../../components/post/post.style.tsx";
 import { GiCrossedSwords } from "react-icons/gi";
+import TextareaGroup from "../../../components/common/textarea/TextareaGroup.tsx";
+import { AdminButtonGroup } from "../../../components/admin/admin.style.tsx";
 
 function CreatePostPage() {
     const navigate = useNavigate();
@@ -87,16 +87,12 @@ function CreatePostPage() {
                     registerObj={register("title")}
                 />
 
-                <StyledInputGroup style={{ marginTop: "24px" }}>
-                    <Label htmlFor="content">주제 발제 (본문)</Label>
-                    <FormTextarea
-                        id="content"
-                        placeholder="자신의 의견을 지지해줄 근거와 함께 토론 주제를 상세히 적어주세요."
-                        $hasError={!!errors.content}
-                        {...register("content")}
-                    />
-                    {errors.content && <ErrorMessage>{errors.content.message}</ErrorMessage>}
-                </StyledInputGroup>
+                <TextareaGroup
+                    label={"토론 내용"}
+                    placeholder="자신의 의견을 지지해줄 근거와 함께 토론 주제를 상세히 적어주세요."
+                    errorMessage={errors.content?.message}
+                    registerObj={register("content")}
+                />
 
                 <FormDivider />
 
@@ -130,7 +126,7 @@ function CreatePostPage() {
                     />
                 </VoteFieldsFlex>
 
-                <ButtonGroup style={{ marginTop: "40px" }}>
+                <AdminButtonGroup style={{ marginTop: "40px" }}>
                     <Button
                         type="button"
                         color="secondary"
@@ -146,7 +142,7 @@ function CreatePostPage() {
                         disabled={isSubmitting}>
                         {isSubmitting ? "등록 중..." : "토론 시작하기"}
                     </Button>
-                </ButtonGroup>
+                </AdminButtonGroup>
             </FormWrapper>
         </PostContainer>
     );
