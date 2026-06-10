@@ -19,6 +19,8 @@ import AdminNoticeListPage from "../pages/admin/notice/AdminNoticeListPage.tsx";
 import AdminNoticeCreatePage from "../pages/admin/notice/create/AdminNoticeCreatePage.tsx";
 import AdminNoticeUpdatePage from "../pages/admin/notice/update/AdminNoticeUpdatePage.tsx";
 import AdminNoticeDetailPage from "../pages/admin/notice/detail/AdminNoticeDetailPage.tsx";
+import AdminInquiryListPage from "../pages/admin/inquiry/AdminInquiryListPage.tsx";
+import AdminInquiryDetailPage from "../pages/admin/inquiry/detail/AdminInquiryDetailPage.tsx";
 
 // 회원의 권한에 따라 접근할 수 있는 주소를 판별하기 위해서
 // react-router 라이브러리에서는 "로더(loader)"라는 기능을 제공함
@@ -111,6 +113,14 @@ const router = createBrowserRouter([
                     { index: true, element: <AdminUserListPage /> },
                     { path: "create", element: <AdminUserCreatePage /> },
                     { path: ":id", element: <AdminUserUpdatePage /> },
+                ],
+            },
+            {
+                path: "inquiry",
+                children: [
+                    { index: true, element: <AdminInquiryListPage /> },
+                    { path: "detail/:inquiryId", element: <AdminInquiryDetailPage /> },
+                    // 관리자는 문의글을 '생성'하지 않고 '답변'만 하므로 create는 필요 없습니다!
                 ],
             },
             {

@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import styled from "styled-components";
-import { FiGrid, FiUsers, FiSettings, FiBell } from "react-icons/fi";
+import { FiGrid, FiUsers, FiSettings, FiBell, FiMessageSquare } from "react-icons/fi";
 
 const adminNavList = [
     {
@@ -19,7 +19,13 @@ const adminNavList = [
         id: "notice",
         path: "/admin/notice",
         label: "공지사항 관리",
-        icon: <FiBell size={18} />
+        icon: <FiBell size={18} />,
+    },
+    {
+        id: "inquiry",
+        path: "/admin/inquiry",
+        label: "1:1 문의 관리", // 💡 문의 관리 메뉴 추가
+        icon: <FiMessageSquare size={18} />,
     },
     {
         id: "home",
