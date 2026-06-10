@@ -1,4 +1,3 @@
-// /src/components/admin/admin.style.tsx
 import styled from "styled-components";
 
 export const AdminContainer = styled.div`
@@ -90,7 +89,7 @@ export const AdminDetailMeta = styled.div`
     align-items: center;
     gap: 12px;
     font-size: 14px;
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: ${({ theme }) => theme.colors.secondary};
 
     .divider {
         color: ${({ theme }) => theme.colors.divider};

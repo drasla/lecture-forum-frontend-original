@@ -1,18 +1,18 @@
 import styled, { css } from "styled-components";
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 // 💡 서비스에서 자주 쓰일 법한 색상 타입들을 미리 정의해둡니다.
 export type BadgeColor = "primary" | "secondary" | "error" | "success" | "default";
 
-interface BadgeProps {
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement>{
     color?: BadgeColor;
     children: ReactNode;
     className?: string;
 }
 
-function Badge({ color = "default", children, className }: BadgeProps) {
+function Badge({ color = "default", children, className, ...props }: BadgeProps) {
     return (
-        <StyledBadge $color={color} className={className}>
+        <StyledBadge $color={color} className={className} {...props}>
             {children}
         </StyledBadge>
     );
