@@ -9,6 +9,7 @@ interface AuthState {
 
     login: (user: User, token: string) => void;
     logout: VoidFunction;
+    setUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -19,8 +20,8 @@ export const useAuthStore = create<AuthState>()(
             token: null,
 
             login: (user, token) => set({ isLoggedIn: true, user, token }),
-
             logout: () => set({ isLoggedIn: false, user: null, token: null }),
+            setUser: user => set({ user }),
         }),
         {
             name: "auth-storage",

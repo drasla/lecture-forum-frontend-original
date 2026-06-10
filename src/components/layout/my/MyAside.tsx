@@ -1,6 +1,13 @@
 import { Link, useLocation } from "react-router";
 import styled from "styled-components";
-import { FiUser, FiMessageSquare, FiFileText, FiMessageCircle, FiArrowLeft } from "react-icons/fi";
+import {
+    FiUser,
+    FiMessageSquare,
+    FiFileText,
+    FiMessageCircle,
+    FiArrowLeft,
+    FiLock,
+} from "react-icons/fi";
 
 const myNavList = [
     {
@@ -8,6 +15,12 @@ const myNavList = [
         path: "/my/profile",
         label: "회원정보 수정",
         icon: <FiUser size={18} />,
+    },
+    {
+        id: "password",
+        path: "/my/password",
+        label: "비밀번호 변경",
+        icon: <FiLock size={18} />,
     },
     {
         id: "inquiry",
