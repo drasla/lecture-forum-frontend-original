@@ -1,9 +1,10 @@
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "./styles/theme.ts";
-import { GlobalStyle } from "./styles/GlobalStyle.ts";
 import { RouterProvider } from "react-router";
-import GetRouter from "./router/getRouter.tsx";
-import { useThemeStore } from "./stores/theme/ThemeStore.ts";
+import { useThemeStore } from "./stores/theme/themeStore.ts";
+import GetRouter from "./router/GetRouter.tsx";
+import { GlobalStyle } from "./styles/GlobalStyle.tsx";
+import { AuthProvider } from "./providers/auth/AuthProvider.tsx";
 
 function App() {
     const { theme } = useThemeStore();
@@ -11,7 +12,9 @@ function App() {
     return (
         <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
             <GlobalStyle />
-            <RouterProvider router={GetRouter} />
+            <AuthProvider>
+                <RouterProvider router={GetRouter} />
+            </AuthProvider>
         </ThemeProvider>
     );
 }
