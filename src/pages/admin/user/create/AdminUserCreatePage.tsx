@@ -17,9 +17,9 @@ import InputGroup from "../../../../components/common/input/InputGroup.tsx";
 import SelectGroup from "../../../../components/common/select/SelectGroup.tsx";
 import { Gender, Role } from "../../../../types/user.type.ts";
 import Button from "../../../../components/common/button/Button.tsx";
+import adminUserApi from "../../../../api/admin/user/adminUserApi.ts";
 import * as axios from "axios";
 import { AuthRootErrorMessage } from "../../../../components/auth/auth.style.tsx";
-import adminUserApi from "../../../../api/admin/adminUserApi.ts";
 
 function AdminUserCreatePage() {
     const navigate = useNavigate();

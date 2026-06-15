@@ -1,6 +1,6 @@
-import type { PaginationResponseType } from "../../types/common.type.ts";
-import type { Post } from "../../types/post.type.ts";
 import axiosInstance from "../axiosInstance.ts";
+import type { PaginationResponseType } from "../../types/common.type.ts";
+import type { Post, RecentPost } from "../../types/post.type.ts";
 import type { CreatePostInputType } from "../../schemas/post/createPostSchema.ts";
 
 const fetchPostListByCategory = async (
@@ -8,7 +8,14 @@ const fetchPostListByCategory = async (
     page: number,
     size: number,
 ): Promise<PaginationResponseType<Post>> => {
-    const response = await axiosInstance(`/post/list/${categoryId}?page=${page}&size=${size}`);
+    const response = await axiosInstance.get(`/post/list/${categoryId}?page=${page}&size=${size}`);
+    return response.data.data;
+};
+
+const fetchRecentPostList = async (size: number = 20): Promise<RecentPost[]> => {
+    const response = await axiosInstance.get("/post/recent", {
+        params: { size },
+    });
     return response.data.data;
 };
 
@@ -17,27 +24,25 @@ const fetchPostById = async (id: number): Promise<Post> => {
     return response.data.data;
 };
 
-const createPost = async (categoryId: number, input: CreatePostInputType): Promise<Post> => {
-    const body = {
-        ...input,
-        categoryId: categoryId,
-    };
-    const response = await axiosInstance.post("/post/create", body);
+const createPost = async (data: CreatePostInputType) => {
+    const response = await axiosInstance.post("/post/create", data);
     return response.data.data;
 };
 
-const votePost = async (postId: number, option: number): Promise<void> => {
+const votePost = async (postId: number, option: number) => {
     await axiosInstance.post(`/post/${postId}/vote`, { option });
+    // 백엔드가 처리 후 응답(Response)하는 내용이 필요 없으면 return 안해도 됨
 };
 
-const cancelVotePost = async (postId: number): Promise<void> => {
+const cancelVotePost = async (postId: number) => {
     await axiosInstance.delete(`/post/${postId}/vote`);
 };
 
 export default {
     fetchPostListByCategory,
-    fetchPostById,
+    fetchRecentPostList,
     createPost,
+    fetchPostById,
     votePost,
     cancelVotePost,
 };

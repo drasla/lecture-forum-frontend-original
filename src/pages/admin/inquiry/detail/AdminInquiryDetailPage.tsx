@@ -1,174 +1,119 @@
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router";
-import styled from "styled-components";
+import { useNavigate, useParams } from "react-router";
+import { useCallback, useEffect, useState } from "react";
 import type { Inquiry } from "../../../../types/inquiry.type.ts";
 import adminInquiryApi from "../../../../api/admin/adminInquiryApi.ts";
-import type { InquiryAnswerInputType } from "../../../../schemas/inquiry/inquiryAnswerSchema.ts";
 import {
-    AdminButtonGroup,
-    AdminContainer,
-    AdminDetailContent,
-    AdminDetailHeader,
-    AdminDetailMeta,
-    AdminDetailTitle,
-    AdminDivider,
-    AdminLoadingText,
-    AdminPageHeader,
-    AdminTitle,
-} from "../../../../components/admin/admin.style.tsx";
-import Card from "../../../../components/common/card/Card.tsx";
-import Badge from "../../../../components/common/badge/Badge.tsx";
-import AdminInquiryForm from "../../../../components/inquiry/AdminInquiryForm.tsx";
-import AdminInquiryAnswerBox from "../../../../components/inquiry/AdminInquiryAnswerBox.tsx";
+    DetailContent,
+    DetailHeader,
+    DetailInfo,
+    DetailTitle,
+    DetailWrapper,
+    LoadingText,
+    PostContainer,
+} from "../../../../components/post/post.style.tsx";
+import { AdminButtonGroup, AnswerSection } from "../../../../components/admin/admin.style.tsx";
 import Button from "../../../../components/common/button/Button.tsx";
+import AdminInquiryAnswerForm from "../../../../components/inquiry/AdminInquiryAnswerForm.tsx";
+import AdminInquiryAnswerBox from "../../../../components/inquiry/AdminInquiryAnswerBox.tsx";
 
 function AdminInquiryDetailPage() {
-    const { inquiryId } = useParams<{ inquiryId: string }>();
     const navigate = useNavigate();
-    const id = Number(inquiryId);
-
     const [inquiry, setInquiry] = useState<Inquiry | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+
+    const { id } = useParams<{ id: string }>();
+    const inquiryId = Number(id);
+
+    // useCallback() : React에서 제공하는 기능
+    // loadInquiry는 useEffect 안에 있을 때는 계속 새로운 애가 생성되는건데
+    // 밖으로 뺐기 때문에 loadInquiry 애는 유일한 애가 되었음
+    // useCallback은 불러낼 때 이 안에 넣은 함수가 재생성되는걸 결정하는 의존성 배열
+
+    // useEffect : 초기 렌더링이 끝난 이후에 1회 무조건 실행
+    //             의존성 배열에 존재하는 값이 변경이 될 경우, 재실행
+
+    // useCallback : 최초에 함수가 생성되어 메모리에 저장
+    //               의존성 배열에 존재하는 값이 변경이 될 경우, 함수를 재생성
+
+    // loadInquiry라고 작성한 함수는, AdminInquiryDetailPage(부모 컴포넌트)가
+    // 화면에 출력이 될 때 완성상태로 메모리에 적재되고
+    // 그걸 계속 useEffect가 불러와서 쓰게 됨  -> 뭔가 상황이 바뀌었다는 걸 의미
+    // useCallback으로, 상황이 바뀐걸 반영해서 함수를 재생성해달라고 씀
 
     const loadInquiry = useCallback(async () => {
-        setIsLoading(true);
         try {
-            const data = await adminInquiryApi.getInquiryById(id);
+            const data = await adminInquiryApi.getInquiryById(inquiryId);
             setInquiry(data);
         } catch (error) {
-            console.error(error);
-            alert("문의글을 불러오지 못했습니다.");
+            console.log(error);
+            alert("게시글을 불러오는데 오류가 발생되었습니다.");
             navigate(-1);
         } finally {
             setIsLoading(false);
         }
-    }, [id, navigate]);
+    }, [inquiryId, navigate]);
 
     useEffect(() => {
-        if (isNaN(id)) {
-            alert("잘못된 접근입니다.");
-            navigate("/admin/inquiry");
-            return;
-        }
         // eslint-disable-next-line react-hooks/set-state-in-effect
         loadInquiry().then(() => {});
-    }, [id, loadInquiry, navigate]);
+    }, [inquiryId, loadInquiry, navigate]);
 
-    const handleAnswerSubmit = async (data: InquiryAnswerInputType) => {
-        try {
-            await adminInquiryApi.answerInquiry(id, data);
-            alert("답변이 성공적으로 등록(수정)되었습니다.");
-            setIsEditing(false);
-            await loadInquiry();
-        } catch (error) {
-            console.error(error);
-            alert("답변 등록 중 오류가 발생했습니다.");
-        }
-    };
-
-    const handleDeleteAnswer = async () => {
-        if (!window.confirm("정말 이 답변을 삭제하고 '대기' 상태로 되돌리시겠습니까?")) return;
-
-        try {
-            await adminInquiryApi.deleteInquiryAnswer(id);
-            alert("답변이 삭제되었습니다.");
-            setIsEditing(false);
-            await loadInquiry();
-        } catch (error) {
-            console.error(error);
-            alert("답변 삭제 중 오류가 발생했습니다.");
-        }
-    };
-
-    if (isLoading || !inquiry) {
+    if (isLoading) {
         return (
-            <AdminContainer>
-                <AdminLoadingText>데이터를 불러오는 중입니다...</AdminLoadingText>
-            </AdminContainer>
+            <PostContainer>
+                <LoadingText>문의 내용을 불러오는 중입니다...</LoadingText>
+            </PostContainer>
         );
     }
 
-    const showForm = !inquiry.answer || isEditing;
+    if (!inquiry) return;
 
     return (
-        <AdminContainer>
-            <AdminPageHeader>
-                <AdminTitle>1:1 문의 상세 및 답변</AdminTitle>
-            </AdminPageHeader>
+        <PostContainer>
+            <DetailWrapper>
+                <DetailHeader>
+                    <DetailTitle>{inquiry.title}</DetailTitle>
+                    <DetailInfo>
+                        <div className={"left-info"}>
+                            <span>{new Date(inquiry.createdAt).toLocaleString()}</span>
+                        </div>
+                    </DetailInfo>
+                </DetailHeader>
 
-            <Card padding="32px">
-                <AdminDetailHeader>
-                    <AdminDetailTitle>
-                        <Badge
-                            color={inquiry.answer ? "success" : "error"}
-                            className="status-badge">
-                            {inquiry.answer ? "답변 완료" : "답변 대기"}
-                        </Badge>
-                        {inquiry.title}
-                    </AdminDetailTitle>
-                    <AdminDetailMeta>
-                        <span>
-                            작성자: {inquiry.user.nickname} ({inquiry.user.email})
-                        </span>
-                        <span className="divider">|</span>
-                        <span>
-                            {new Date(inquiry.createdAt).toLocaleString("ko-KR", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                        </span>
-                    </AdminDetailMeta>
-                </AdminDetailHeader>
+                <DetailContent>{inquiry.content}</DetailContent>
 
-                <AdminDivider />
-                <AdminDetailContent>{inquiry.content}</AdminDetailContent>
-                <AdminDivider />
+                <hr />
 
-                {/* 💡 공통 컴포넌트를 조립하여 UI 구성 */}
+                {/*
+                     만약에, 답변이 아직 달리지 않았다면 Textarea를 띄워서 답변을 달 수 있도록 할 것이고
+                            답변이 이미 달렸다면 답변 내용이 출력될 수 있도록 함
+                */}
                 <AnswerSection>
-                    {showForm ? (
-                        <AdminInquiryForm
-                            initialAnswer={inquiry.answer}
-                            isEditing={isEditing}
-                            onSubmit={handleAnswerSubmit}
-                            onCancel={() => setIsEditing(false)}
+                    {inquiry.answer && !isEdit ? (
+                        <AdminInquiryAnswerBox
+                            inquiry={inquiry}
+                            reload={loadInquiry}
+                            setIsEdit={setIsEdit}
                         />
                     ) : (
-                        <AdminInquiryAnswerBox
-                            answer={inquiry.answer!}
-                            answeredAt={inquiry.answeredAt}
-                            onEdit={() => setIsEditing(true)}
-                            onDelete={handleDeleteAnswer}
+                        <AdminInquiryAnswerForm
+                            inquiry={inquiry}
+                            reload={loadInquiry}
+                            isEdit={isEdit}
+                            setIsEdit={setIsEdit}
                         />
                     )}
                 </AnswerSection>
 
-                <AdminButtonGroup $align="left" style={{ marginTop: "32px" }}>
-                    <Button variant="text" color="secondary" onClick={() => navigate(-1)}>
-                        목록으로 돌아가기
+                <AdminButtonGroup style={{ marginTop: "40px" }}>
+                    <Button color={"secondary"} variant={"contained"} onClick={() => navigate(-1)}>
+                        목록으로
                     </Button>
                 </AdminButtonGroup>
-            </Card>
-        </AdminContainer>
+            </DetailWrapper>
+        </PostContainer>
     );
 }
 
 export default AdminInquiryDetailPage;
-
-// --- Styled Components ---
-
-const AnswerSection = styled.div`
-    margin-top: 32px;
-    padding: 24px;
-    background-color: ${({ theme }) => theme.colors.background.default};
-    border-radius: 8px;
-
-    .status-badge {
-        margin-right: 12px;
-        vertical-align: middle;
-    }
-`;

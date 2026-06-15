@@ -1,40 +1,43 @@
-import type { PaginationResponseType } from "../../types/common.type.ts";
 import axiosInstance from "../axiosInstance.ts";
+import type { PaginationResponseType } from "../../types/common.type.ts";
 import type { Inquiry } from "../../types/inquiry.type.ts";
 import type { InquiryInputType } from "../../schemas/inquiry/inquirySchema.ts";
 
-const getInquiryList = async (
-    page: number = 1,
-    size: number = 20,
+const getMyInquiryList = async (
+    page: number,
+    size: number,
 ): Promise<PaginationResponseType<Inquiry>> => {
     const response = await axiosInstance.get("/inquiry/list", {
-        params: { page, size },
+        params: {
+            page,
+            size,
+        },
     });
     return response.data.data;
 };
 
-const getInquiryById = async (inquiryId: number): Promise<Inquiry> => {
+const getMyInquiryById = async (inquiryId: number): Promise<Inquiry> => {
     const response = await axiosInstance.get(`/inquiry/${inquiryId}`);
     return response.data.data;
 };
 
-const createInquiry = async (data: InquiryInputType): Promise<Inquiry> => {
-    const response = await axiosInstance.post("/inquiry/create", data);
+const createInquiry = async (input: InquiryInputType): Promise<Inquiry> => {
+    const response = await axiosInstance.post("/inquiry/create", input);
     return response.data.data;
 };
 
-const updateInquiry = async (inquiryId: number, data: InquiryInputType): Promise<Inquiry> => {
-    const response = await axiosInstance.patch(`/inquiry/${inquiryId}`, data);
+const updateInquiry = async (inquiryId: number, input: InquiryInputType) => {
+    const response = await axiosInstance.patch(`/inquiry/${inquiryId}`, input);
     return response.data.data;
-};
+}
 
 const deleteInquiry = async (inquiryId: number): Promise<void> => {
     await axiosInstance.delete(`/inquiry/${inquiryId}`);
-};
+}
 
 export default {
-    getInquiryList,
-    getInquiryById,
+    getMyInquiryList,
+    getMyInquiryById,
     createInquiry,
     updateInquiry,
     deleteInquiry,

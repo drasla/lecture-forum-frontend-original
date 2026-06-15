@@ -1,35 +1,33 @@
-import type { PaginationResponseType } from "../../types/common.type.ts";
 import axiosInstance from "../axiosInstance.ts";
-import type { Inquiry } from "../../types/inquiry.type.ts";
-import type { InquiryAnswerInputType } from "../../schemas/inquiry/inquiryAnswerSchema.ts";
+import type { AdminInquiryAnswerInputType } from "../../schemas/admin/inquiry/adminInquiryAnswerSchema.ts";
 
-const getInquiryList = async (
-    page: number = 1,
-    size: number = 20,
-): Promise<PaginationResponseType<Inquiry>> => {
+const getInquiryList = async (page: number, size: number) => {
     const response = await axiosInstance.get("/admin/inquiry/list", {
-        params: { page, size },
+        params: {
+            page,
+            size,
+        },
     });
     return response.data.data;
 };
 
-const getInquiryById = async (inquiryId: number): Promise<Inquiry> => {
+const getInquiryById = async (inquiryId: number) => {
     const response = await axiosInstance.get(`/admin/inquiry/${inquiryId}`);
     return response.data.data;
 };
 
-const answerInquiry = async (inquiryId: number, data: InquiryAnswerInputType): Promise<Inquiry> => {
-    const response = await axiosInstance.patch(`/admin/inquiry/${inquiryId}`, data);
+const updateInquiryAnswer = async (inquiryId: number, input: AdminInquiryAnswerInputType) => {
+    const response = await axiosInstance.patch(`/admin/inquiry/${inquiryId}`, input);
     return response.data.data;
-};
+}
 
-const deleteInquiryAnswer = async (inquiryId: number): Promise<void> => {
+const deleteInquiryAnswer = async (inquiryId: number) => {
     await axiosInstance.delete(`/admin/inquiry/${inquiryId}`);
-};
+}
 
 export default {
     getInquiryList,
     getInquiryById,
-    answerInquiry,
+    updateInquiryAnswer,
     deleteInquiryAnswer,
 };

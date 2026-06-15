@@ -1,9 +1,4 @@
-import { useState } from "react";
-import postApi from "../../api/user/postApi.ts";
-import { useAuthStore } from "../../stores/auth/AuthStore.ts";
-import type { Post } from "../../types/post.type.ts";
 import { GiCrossedSwords } from "react-icons/gi";
-import { LuDroplets, LuFlame, LuRotateCcw } from "react-icons/lu";
 import {
     BattleGround,
     BattleTitle,
@@ -15,29 +10,37 @@ import {
     VoteCard,
     VoteSection,
 } from "./post.style.tsx";
+import { LuDroplets, LuFlame, LuRotateCcw } from "react-icons/lu";
+import type { Post } from "../../types/post.type.ts";
+import postApi from "../../api/user/postApi.ts";
+import { useState } from "react";
+import { useAuthStore } from "../../stores/auth/authStore.ts";
 
-interface PostVoteProps {
+interface Props {
     post: Post;
-    postId: number;
-    onRefresh: () => Promise<void>; // 부모(PostDetailPage)의 loadPost를 실행하기 위한 함수
+    loadPost: () => Promise<void>;
 }
 
-function PostVote({ post, postId, onRefresh }: PostVoteProps) {
-    const { isLoggedIn } = useAuthStore();
+function PostVote({ post, loadPost }: Props) {
     const [isVoting, setIsVoting] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
+    const { isLoggedIn } = useAuthStore();
 
-    // 투표 기능이 없는 일반 글이거나 데이터가 없으면 렌더링하지 않음
-    const hasVoteSystem = !!post.option1Text && !!post.option2Text;
-    if (!hasVoteSystem || !post.vote) return null;
+    if (!post.vote) {
+        return null;
+    }
 
-    const totalVotes = post.vote.totalCount || 0;
+    const totalVotes = post.vote?.totalCount || 0;
+    // 전체 투표 수가 0이면, option1 투표한 퍼센트를 50%로 가져가고, opt2 투표한 퍼센트도 50%
+    // Math.ceil() => 올림
+    // Math.round(값, ) => 반올림
     const opt1Percent =
-        totalVotes > 0 ? Math.round((post.vote.option1Count / totalVotes) * 100) : 50;
+        totalVotes > 0 && post.vote ? Math.round((post.vote.option1Count / totalVotes) * 100) : 50;
     const opt2Percent =
-        totalVotes > 0 ? Math.round((post.vote.option2Count / totalVotes) * 100) : 50;
+        totalVotes > 0 && post.vote ? Math.round((post.vote.option2Count / totalVotes) * 100) : 50;
 
     const handleVote = async (option: number) => {
+        // 들어온 option을 가지고, 백엔드에게 요청
         if (!isLoggedIn) {
             alert("투표에 참여하려면 로그인이 필요합니다.");
             return;
@@ -45,10 +48,11 @@ function PostVote({ post, postId, onRefresh }: PostVoteProps) {
 
         setIsVoting(true);
         try {
-            await postApi.votePost(postId, option);
-            await onRefresh(); // 💡 부모 컴포넌트의 데이터를 새로고침하여 게이지 바 갱신
+            await postApi.votePost(Number(post.id), option);
+            // 여기서 글 내용을 다시 받아와야 할 필요가 있음
+            await loadPost();
         } catch (error) {
-            console.error("투표 실패 : ", error);
+            console.log("투표 실패 : ", error);
             alert("투표 처리 중 오류가 발생했습니다.");
         } finally {
             setIsVoting(false);
@@ -56,14 +60,16 @@ function PostVote({ post, postId, onRefresh }: PostVoteProps) {
     };
 
     const handleCancelVote = async () => {
-        if (!window.confirm("투표를 취소하고 다시 선택하시겠습니까?")) return;
+        if (!confirm("투표를 취소하고 다시 선택하시겠습니까?")) {
+            return;
+        }
 
         setIsCanceling(true);
         try {
-            await postApi.cancelVotePost(postId);
-            await onRefresh();
+            await postApi.cancelVotePost(Number(post.id));
+            await loadPost();
         } catch (error) {
-            console.error("투표 취소 실패 : ", error);
+            console.log("투표 취소 실패 : ", error);
             alert("투표 취소 처리 중 오류가 발생했습니다.");
         } finally {
             setIsCanceling(false);
@@ -77,7 +83,9 @@ function PostVote({ post, postId, onRefresh }: PostVoteProps) {
                 당신의 선택은?
             </BattleTitle>
 
+            {/* 지금 현재 사용자가 투표를 했을 때, 투표를 안 했을 때 */}
             {post.vote.hasVoted ? (
+                // 투표가 되었을 때
                 <ResultSection>
                     <ResultBarWrapper>
                         <ResultBar $color={"#EF4444"} $width={`${opt1Percent}%`}>
@@ -105,6 +113,7 @@ function PostVote({ post, postId, onRefresh }: PostVoteProps) {
                     </RevoteButton>
                 </ResultSection>
             ) : (
+                // 투표가 안되었을 때
                 <VoteSection>
                     <VoteCard $color={"#EF4444"} onClick={() => handleVote(1)} disabled={isVoting}>
                         <LuFlame size={32} />

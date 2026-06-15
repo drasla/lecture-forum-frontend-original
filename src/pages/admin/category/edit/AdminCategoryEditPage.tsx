@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as axios from "axios";
-import { useNavigate, useParams, Link } from "react-router";
 import {
-    type AdminUpdateCategoryInputType,
-    adminUpdateCategorySchema,
-} from "../../../../schemas/admin/category/adminUpdateCategorySchema.ts";
-import adminCategoryApi from "../../../../api/admin/adminCategoryApi.ts";
-import InputGroup from "../../../../components/common/input/InputGroup.tsx";
-import Button from "../../../../components/common/button/Button.tsx";
+    type AdminEditCategoryInputType,
+    adminEditCategorySchema,
+} from "../../../../schemas/admin/category/adminEditCategorySchema.ts";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
     AdminButtonGroup,
     AdminContainer,
@@ -19,31 +13,37 @@ import {
     AdminTitle,
 } from "../../../../components/admin/admin.style.tsx";
 import Card from "../../../../components/common/card/Card.tsx";
+import InputGroup from "../../../../components/common/input/InputGroup.tsx";
+import Button from "../../../../components/common/button/Button.tsx";
+import { Link, useNavigate, useParams } from "react-router";
+import adminCategoryApi from "../../../../api/admin/adminCategoryApi.ts";
+import * as axios from "axios";
+import { useEffect, useState } from "react";
 
-function AdminCategoryUpdatePage() {
-    const { id } = useParams<{ id: string }>(); // URL에서 ID 추출
+function AdminCategoryEditPage() {
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
 
     const {
         register,
         handleSubmit,
-        setValue, // 💡 초기값을 셋팅하기 위한 함수
+        setValue, // input에 들어가는 값을 바꿀 수 있는 메서드
         setError,
         formState: { errors, isSubmitting },
-    } = useForm<AdminUpdateCategoryInputType>({
-        resolver: zodResolver(adminUpdateCategorySchema),
+    } = useForm<AdminEditCategoryInputType>({
+        resolver: zodResolver(adminEditCategorySchema),
+        mode: "onBlur",
     });
 
-    // 💡 화면 진입 시 기존 카테고리 데이터 불러오기
     useEffect(() => {
         const loadInitialData = async () => {
             if (!id) return;
             try {
-                const targetCategory = await adminCategoryApi.fetchCategoryById(Number(id));
-                setValue("name", targetCategory.name);
+                const result = await adminCategoryApi.fetchCategoryById(Number(id));
+                setValue("name", result.name);
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 alert("존재하지 않거나 삭제된 카테고리입니다.");
                 navigate("/admin/category");
             } finally {
@@ -52,17 +52,17 @@ function AdminCategoryUpdatePage() {
         };
 
         loadInitialData().then(() => {});
-    }, [id, setValue, navigate]);
+    }, [id, navigate, setValue]);
 
-    // 💡 폼 제출(수정) 핸들러
-    const onSubmit = async (data: AdminUpdateCategoryInputType) => {
+    const onSubmit = async (data: AdminEditCategoryInputType) => {
+        // 입력된 정보를 백엔드에게 전송
         try {
-            await adminCategoryApi.updateCategory(Number(id), data.name);
+            await adminCategoryApi.updateCategory(Number(id), data);
             alert("카테고리가 성공적으로 수정되었습니다.");
-            navigate("/admin/category"); // 성공 시 목록으로 이동
+            navigate("/admin/category");
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 409) {
-                setError("name", { message: "이미 존재하는 카테고리명입니다." });
+                setError("name", { message: "이미 존재하는 카테고리 명입니다." });
             } else {
                 alert("카테고리 수정 중 오류가 발생했습니다.");
             }
@@ -81,28 +81,26 @@ function AdminCategoryUpdatePage() {
                 ) : (
                     <AdminForm onSubmit={handleSubmit(onSubmit)}>
                         <InputGroup
-                            id="categoryName"
-                            label="카테고리명"
-                            placeholder="수정할 카테고리명을 입력하세요 (최대 50자)"
+                            id={"name"}
+                            label={"카테고리 이름"}
+                            placeholder={"수정할 카테고리명을 입력하세요 (최대 50자)"}
                             errorMessage={errors.name?.message}
                             registerObj={register("name")}
                         />
-
                         <AdminButtonGroup>
                             <Button
-                                type="button"
-                                variant="text"
-                                color="secondary"
+                                color={"secondary"}
+                                variant={"text"}
                                 as={Link}
-                                to="/admin/category">
+                                to={"/admin/category"}>
                                 취소
                             </Button>
                             <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
+                                type={"submit"}
+                                variant={"contained"}
+                                color={"primary"}
                                 disabled={isSubmitting}>
-                                {isSubmitting ? "수정 중..." : "수정 완료"}
+                                수정
                             </Button>
                         </AdminButtonGroup>
                     </AdminForm>
@@ -112,4 +110,4 @@ function AdminCategoryUpdatePage() {
     );
 }
 
-export default AdminCategoryUpdatePage;
+export default AdminCategoryEditPage;

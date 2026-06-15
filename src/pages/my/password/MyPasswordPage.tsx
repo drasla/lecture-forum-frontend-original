@@ -1,18 +1,21 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import styled from "styled-components";
-import { isAxiosError } from "axios";
-
-import userApi from "../../../api/user/userApi.ts";
 import {
     type UpdatePasswordInputType,
     updatePasswordSchema,
 } from "../../../schemas/user/updatePasswordSchema.ts";
-
-import InputGroup from "../../../components/common/input/InputGroup.tsx";
-import Button from "../../../components/common/button/Button.tsx";
+import {
+    FormWrapper,
+    PostContainer,
+    PostPageHeader,
+    PostTitle,
+} from "../../../components/post/post.style.tsx";
 import Card from "../../../components/common/card/Card.tsx";
-import { PostContainer, PostPageHeader, PostTitle } from "../../../components/post/post.style.tsx";
+import InputGroup from "../../../components/common/input/InputGroup.tsx";
+import { AdminButtonGroup } from "../../../components/admin/admin.style.tsx";
+import Button from "../../../components/common/button/Button.tsx";
+import userApi from "../../../api/user/userApi.ts";
+import { isAxiosError } from "axios";
 
 function MyPasswordPage() {
     const {
@@ -20,20 +23,25 @@ function MyPasswordPage() {
         handleSubmit,
         reset,
         formState: { errors, isSubmitting },
-    } = useForm<UpdatePasswordInputType>({
+    } = useForm({
         resolver: zodResolver(updatePasswordSchema),
+        mode: "onBlur",
     });
 
     const onSubmit = async (data: UpdatePasswordInputType) => {
         try {
             await userApi.updatePassword(data);
-            alert("비밀번호가 성공적으로 변경되었습니다. 다음 로그인부터 적용됩니다.");
-            reset(); // 성공 시 입력칸 비우기
-        } catch (error) {
-            console.error(error);
-            let errorMessage = "비밀번호 변경 중 오류가 발생했습니다.";
+            alert("비밀번호 수정이 완료되었습니다.");
+            reset({
+                prevPassword: "",
+                password: "",
+                confirmPassword: "",
+            });
+        } catch(error) {
+            console.log(error);
+            let errorMessage = "회원 비밀번호 수정 중 오류가 발생되었습니다.";
             if (isAxiosError(error)) {
-                errorMessage = error.response?.data?.message || errorMessage;
+                errorMessage = error.response?.data.message || errorMessage;
             }
             alert(errorMessage);
         }
@@ -43,85 +51,52 @@ function MyPasswordPage() {
         <PostContainer>
             <PostPageHeader>
                 <PostTitle>
-                    비밀번호 변경 <small>안전한 서비스 이용을 위해 비밀번호를 관리하세요</small>
+                    비밀번호 수정 <small>소중한 내 정보를 최신 상태로 관리하세요</small>
                 </PostTitle>
             </PostPageHeader>
 
-            <Card padding="32px">
-                <SectionTitle>비밀번호 변경</SectionTitle>
-                <SectionDescription>
-                    현재 사용 중인 비밀번호와 새롭게 변경할 비밀번호를 입력해 주세요.
-                </SectionDescription>
-
-                <PasswordForm onSubmit={handleSubmit(onSubmit)}>
+            <Card>
+                <FormWrapper onSubmit={handleSubmit(onSubmit)}>
                     <InputGroup
-                        id="currentPassword"
-                        label="현재 비밀번호"
-                        type="password"
-                        placeholder="현재 사용 중인 비밀번호를 입력하세요"
-                        errorMessage={errors.currentPassword?.message}
-                        registerObj={register("currentPassword")}
-                    />
-                    <InputGroup
-                        id="newPassword"
-                        label="새 비밀번호"
-                        type="password"
-                        placeholder="6자리 이상의 새 비밀번호를 입력하세요"
-                        errorMessage={errors.newPassword?.message}
-                        registerObj={register("newPassword")}
-                    />
-                    <InputGroup
-                        id="newPasswordConfirm"
-                        label="새 비밀번호 확인"
-                        type="password"
-                        placeholder="새 비밀번호를 다시 한 번 입력하세요"
-                        errorMessage={errors.newPasswordConfirm?.message}
-                        registerObj={register("newPasswordConfirm")}
+                        label={"현재 비밀번호"}
+                        id={"prevPassword"}
+                        type={"password"}
+                        placeholder={"현재 비밀번호를 입력하세요"}
+                        errorMessage={errors.prevPassword?.message}
+                        registerObj={register("prevPassword")}
                     />
 
-                    <ButtonGroup>
+                    <InputGroup
+                        label={"변경할 비밀번호"}
+                        id={"password"}
+                        type={"password"}
+                        placeholder={"변경할 비밀번호를 입력하세요"}
+                        errorMessage={errors.password?.message}
+                        registerObj={register("password")}
+                    />
+
+                    <InputGroup
+                        label={"변경할 비밀번호 확인"}
+                        id={"confirmPassword"}
+                        type={"password"}
+                        placeholder={"변경할 비밀번호를 다시 한 번 입력해주세요"}
+                        errorMessage={errors.confirmPassword?.message}
+                        registerObj={register("confirmPassword")}
+                    />
+
+                    <AdminButtonGroup $align={"right"}>
                         <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            disabled={isSubmitting}>
-                            {isSubmitting ? "변경 중..." : "비밀번호 변경"}
+                            color={"primary"}
+                            variant={"contained"}
+                            disabled={isSubmitting}
+                            type={"submit"}>
+                            비밀번호 변경
                         </Button>
-                    </ButtonGroup>
-                </PasswordForm>
+                    </AdminButtonGroup>
+                </FormWrapper>
             </Card>
         </PostContainer>
     );
 }
 
 export default MyPasswordPage;
-
-// --- Styled Components ---
-
-const SectionTitle = styled.h3`
-    font-size: 20px;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.default};
-    margin-bottom: 8px;
-`;
-
-const SectionDescription = styled.p`
-    font-size: 14px;
-    color: ${({ theme }) => theme.colors.secondary};
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.divider};
-`;
-
-const PasswordForm = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 500px;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 16px;
-`;

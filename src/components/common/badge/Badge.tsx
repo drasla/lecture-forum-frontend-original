@@ -1,31 +1,27 @@
+import type { ReactNode } from "react";
 import styled, { css } from "styled-components";
-import type { HTMLAttributes, ReactNode } from "react";
 
-// 💡 서비스에서 자주 쓰일 법한 색상 타입들을 미리 정의해둡니다.
-export type BadgeColor = "primary" | "secondary" | "error" | "success" | "default";
+type BadgeColor = "primary" | "secondary" | "error" | "success" | "warning" | "info" | "default";
 
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement>{
-    color?: BadgeColor;
+type BadgeProps = {
     children: ReactNode;
-    className?: string;
-}
+    color?: BadgeColor;
+};
 
-function Badge({ color = "default", children, className, ...props }: BadgeProps) {
-    return (
-        <StyledBadge $color={color} className={className} {...props}>
-            {children}
-        </StyledBadge>
-    );
+function Badge({ children, color = "default" }: BadgeProps) {
+    return <StyledBadge $color={color}>{children}</StyledBadge>;
 }
 
 export default Badge;
 
-const StyledBadge = styled.span<{ $color: BadgeColor }>`
+const StyledBadge = styled.span<{
+    $color: BadgeColor;
+}>`
     display: inline-flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
     line-height: 1;
@@ -34,7 +30,7 @@ const StyledBadge = styled.span<{ $color: BadgeColor }>`
         switch ($color) {
             case "primary":
                 return css`
-                    background-color: ${theme.colors.primary}20; /* 투명도 20% */
+                    background-color: ${theme.colors.primary}20;
                     color: ${theme.colors.primary};
                 `;
             case "error":
@@ -44,15 +40,28 @@ const StyledBadge = styled.span<{ $color: BadgeColor }>`
                 `;
             case "success":
                 return css`
-                    background-color: ${theme.colors.success
-                        ? `${theme.colors.success}20`
-                        : "#4caf5020"};
-                    color: ${theme.colors.success || "#4caf50"};
+                    background-color: ${theme.colors.success}20;
+                    color: ${theme.colors.success};
+                `;
+            case "warning":
+                return css`
+                    background-color: ${theme.colors.warning}20;
+                    color: ${theme.colors.warning};
+                `;
+            case "info":
+                return css`
+                    background-color: ${theme.colors.info}20;
+                    color: ${theme.colors.info};
+                `;
+            case "secondary":
+                return css`
+                    background-color: ${theme.colors.secondary}20;
+                    color: ${theme.colors.secondary};
                 `;
             case "default":
             default:
                 return css`
-                    background-color: ${theme.colors.divider};
+                    background-color: ${theme.colors.divider}20;
                     color: ${theme.colors.text.disabled};
                 `;
         }

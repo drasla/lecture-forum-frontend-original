@@ -16,10 +16,10 @@ import {
     AdminLoadingText,
 } from "../../../components/admin/admin.style";
 import noticeApi from "../../../api/user/noticeApi.ts";
-import adminNoticeApi from "../../../api/admin/adminNoticeApi.ts";
 import type { Notice } from "../../../types/notice.type.ts";
+import adminNoticeApi from "../../../api/admin/adminNoticeApi.ts";
 
-function AdminNoticeListPage() {
+function AdminNoticeListPage_Me() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [notices, setNotices] = useState<Notice[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,8 +34,11 @@ function AdminNoticeListPage() {
     const loadNotices = async (currentPage: number) => {
         setIsLoading(true);
         try {
-            // 💡 조회는 공용 API 사용
-            const data = await noticeApi.getNotices(currentPage, size);
+            // 내가 하고 싶은 일 : 백엔드에게 공지사항 목록을 불러오고 싶다
+            // 그 기능 구현이 어느 파일에 되어져 있다
+            // 이 기능을 실행하기 위해서는 무엇이 필요하다 (매개변수)
+            // 그렇게 해서 백엔드가 전달하는 내용이 무엇인가
+            const data = await noticeApi.getNoticeList(currentPage, size);
             setNotices(data.list);
             setTotal(data.total);
         } catch (error) {
@@ -90,61 +93,61 @@ function AdminNoticeListPage() {
                         <AdminTableWrapper>
                             <AdminTable>
                                 <thead>
-                                    <tr>
-                                        <AdminTh $width="10%">ID</AdminTh>
-                                        <AdminTh $width="55%">제목</AdminTh>
-                                        <AdminTh $width="20%">등록일</AdminTh>
-                                        <AdminTh $width="15%">관리</AdminTh>
-                                    </tr>
+                                <tr>
+                                    <AdminTh $width="10%">ID</AdminTh>
+                                    <AdminTh $width="55%">제목</AdminTh>
+                                    <AdminTh $width="20%">등록일</AdminTh>
+                                    <AdminTh $width="15%">관리</AdminTh>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {notices.length === 0 ? (
-                                        <tr>
-                                            <AdminTd
-                                                colSpan={4}
-                                                style={{ textAlign: "center", padding: "32px" }}>
-                                                등록된 공지사항이 없습니다.
+                                {notices.length === 0 ? (
+                                    <tr>
+                                        <AdminTd
+                                            colSpan={4}
+                                            style={{ textAlign: "center", padding: "32px" }}>
+                                            등록된 공지사항이 없습니다.
+                                        </AdminTd>
+                                    </tr>
+                                ) : (
+                                    notices.map(notice => (
+                                        <tr key={notice.id}>
+                                            <AdminTd>{notice.id}</AdminTd>
+                                            <AdminTd>
+                                                <strong>{notice.title}</strong>
+                                            </AdminTd>
+                                            <AdminTd>
+                                                {new Date(notice.createdAt).toLocaleDateString(
+                                                    "ko-KR",
+                                                    {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                    },
+                                                )}
+                                            </AdminTd>
+                                            <AdminTd>
+                                                <AdminButtonGroup $align="left">
+                                                    <Button
+                                                        variant="icon"
+                                                        color="primary"
+                                                        title="수정"
+                                                        as={Link}
+                                                        to={`/admin/notice/${notice.id}`}>
+                                                        <FiEdit size={18} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="icon"
+                                                        color="error"
+                                                        title="삭제"
+                                                        onClick={() => handleDelete(notice.id)}>
+                                                        <FiTrash2 size={18} />
+                                                    </Button>
+                                                </AdminButtonGroup>
                                             </AdminTd>
                                         </tr>
-                                    ) : (
-                                        notices.map(notice => (
-                                            <tr key={notice.id}>
-                                                <AdminTd>{notice.id}</AdminTd>
-                                                <AdminTd>
-                                                    <strong>{notice.title}</strong>
-                                                </AdminTd>
-                                                <AdminTd>
-                                                    {new Date(notice.createdAt).toLocaleDateString(
-                                                        "ko-KR",
-                                                        {
-                                                            year: "numeric",
-                                                            month: "2-digit",
-                                                            day: "2-digit",
-                                                        },
-                                                    )}
-                                                </AdminTd>
-                                                <AdminTd>
-                                                    <AdminButtonGroup $align="left">
-                                                        <Button
-                                                            variant="icon"
-                                                            color="primary"
-                                                            title="수정"
-                                                            as={Link}
-                                                            to={`/admin/notice/${notice.id}`}>
-                                                            <FiEdit size={18} />
-                                                        </Button>
-                                                        <Button
-                                                            variant="icon"
-                                                            color="error"
-                                                            title="삭제"
-                                                            onClick={() => handleDelete(notice.id)}>
-                                                            <FiTrash2 size={18} />
-                                                        </Button>
-                                                    </AdminButtonGroup>
-                                                </AdminTd>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))
+                                )}
                                 </tbody>
                             </AdminTable>
                         </AdminTableWrapper>
@@ -178,7 +181,7 @@ function AdminNoticeListPage() {
     );
 }
 
-export default AdminNoticeListPage;
+export default AdminNoticeListPage_Me;
 
 const PaginationWrapper = styled.div`
     display: flex;

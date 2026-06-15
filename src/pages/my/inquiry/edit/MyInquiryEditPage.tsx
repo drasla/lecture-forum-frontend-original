@@ -1,91 +1,78 @@
-// /src/pages/my/inquiry/edit/MyInquiryEditPage.tsx
-import { useEffect, useState, useCallback } from "react";
-import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import styled from "styled-components";
+import { type InquiryInputType, inquirySchema } from "../../../../schemas/inquiry/inquirySchema.ts";
+import { useEffect, useState } from "react";
 import inquiryApi from "../../../../api/user/inquiryApi.ts";
-import { inquirySchema, type InquiryInputType } from "../../../../schemas/inquiry/inquirySchema.ts";
-import InputGroup from "../../../../components/common/input/InputGroup.tsx";
-import TextareaGroup from "../../../../components/common/textarea/TextareaGroup.tsx";
-import Button from "../../../../components/common/button/Button.tsx";
-
+import { useNavigate, useParams } from "react-router";
 import {
+    FormWrapper,
+    LoadingText,
     PostContainer,
     PostPageHeader,
     PostTitle,
-    FormWrapper,
-    FormDivider,
-    LoadingText,
 } from "../../../../components/post/post.style.tsx";
+import InputGroup from "../../../../components/common/input/InputGroup.tsx";
+import TextareaGroup from "../../../../components/common/textarea/TextareaGroup.tsx";
+import { AdminButtonGroup } from "../../../../components/admin/admin.style.tsx";
+import Button from "../../../../components/common/button/Button.tsx";
 
 function MyInquiryEditPage() {
+    // 사용자 측 "수정" 화면을 만들어야 해
+    // 화면에서 받아서 전달해야 되는 정보 : title, content   (req.body)
+    //         => schema가 필요하구나 => 생성 때 만든 schema가 있네 => 값이 같네? => 그냥 쓰면 되겠네
+    // 문의 글 번호 : inquiryId (req.params)
+    // 백엔드에게 요청해서 내용을 불러오고     => API를 만들어야 되는구나
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const inquiryId = Number(id);
+    // 구조분해할당 할 때 동일한 이름을 붙여서 변수를 만들어야 함
+    const { inquiryId } = useParams<{ inquiryId: string }>();
+    const id = Number(inquiryId);
 
-    const [isPageLoading, setIsPageLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     const {
         register,
         handleSubmit,
-        reset,
+        reset, // 이 화면은 수정 화면 => input 현재 글 정보를 불러와서 넣어줘야 됨
         formState: { errors, isSubmitting },
-    } = useForm<InquiryInputType>({
+    } = useForm({
         resolver: zodResolver(inquirySchema),
+        mode: "onBlur",
     });
 
-    // 기존 데이터 불러오기
-    const fetchInquiry = useCallback(async () => {
-        setIsPageLoading(true);
-        try {
-            const data = await inquiryApi.getInquiryById(inquiryId);
-
-            // 💡 클라이언트단 방어 로직: 이미 답변이 달렸으면 접근 차단
-            if (data.answer) {
-                alert("이미 답변이 등록된 문의글은 수정할 수 없습니다.");
-                navigate(`/my/inquiry/${inquiryId}`, { replace: true });
-                return;
-            }
-
-            reset({
-                title: data.title,
-                content: data.content,
-            });
-        } catch (error) {
-            console.error("데이터 로드 실패:", error);
-            alert("존재하지 않거나 삭제된 문의글입니다.");
-            navigate("/my/inquiry", { replace: true });
-        } finally {
-            setIsPageLoading(false);
-        }
-    }, [inquiryId, navigate, reset]);
-
     useEffect(() => {
-        if (isNaN(inquiryId)) {
-            alert("잘못된 접근입니다.");
-            navigate("/my/inquiry", { replace: true });
-            return;
-        }
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchInquiry().then(() => {});
-    }, [inquiryId, fetchInquiry, navigate]);
+        const loadInquiry = async () => {
+            try {
+                const result = await inquiryApi.getMyInquiryById(id);
+                reset({
+                    title: result.title,
+                    content: result.content,
+                });
+            } catch (error) {
+                console.log(error);
+                alert("문의글을 불러오는데 실패하였습니다. 다시 시도하여 주세요.");
+                navigate(-1);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadInquiry().then(() => {});
+    }, [id, navigate, reset]);
 
     const onSubmit = async (data: InquiryInputType) => {
         try {
-            await inquiryApi.updateInquiry(inquiryId, data);
-            alert("문의 내용이 성공적으로 수정되었습니다.");
-            navigate(`/my/inquiry/${inquiryId}`, { replace: true }); // 수정 완료 후 상세 페이지로 복귀
+            await inquiryApi.updateInquiry(id, data);
+            navigate(`/my/inquiry/${id}`);
         } catch (error) {
-            console.error("문의글 수정 실패:", error);
-            alert("문의글 수정 중 오류가 발생했습니다.");
+            console.log(error);
+            alert("문의 글 수정 중 오류가 발생되었습니다.");
         }
     };
 
-    if (isPageLoading) {
+    if (isLoading) {
         return (
             <PostContainer>
-                <LoadingText>데이터를 불러오는 중입니다...</LoadingText>
+                <LoadingText>데이터를 불러오는 중입니다</LoadingText>
             </PostContainer>
         );
     }
@@ -100,54 +87,35 @@ function MyInquiryEditPage() {
 
             <FormWrapper onSubmit={handleSubmit(onSubmit)}>
                 <InputGroup
-                    id="title"
-                    label="문의 제목"
-                    placeholder="문의하실 내용의 제목을 입력해주세요."
+                    label={"문의 제목"}
+                    id={"title"}
+                    placeholder={"문의 사항의 제목을 입력해주세요"}
                     errorMessage={errors.title?.message}
                     registerObj={register("title")}
                 />
-
-                <FormDivider />
-
                 <TextareaGroup
-                    id="content"
-                    label="문의 내용"
-                    placeholder="관리자가 정확하게 답변할 수 있도록 문의 내용을 상세히 적어주세요."
+                    label={"문의 내용"}
+                    id={"content"}
+                    placeholder={"발생된 문제점에 대해 자세히 입력해주세요."}
                     errorMessage={errors.content?.message}
                     registerObj={register("content")}
-                    style={{ minHeight: "300px" }}
                 />
 
-                <ButtonGroup>
-                    <Button
-                        type="button"
-                        variant="text"
-                        color="secondary"
-                        onClick={() => navigate(-1)}
-                        disabled={isSubmitting}>
+                <AdminButtonGroup>
+                    <Button color={"primary"} variant={"text"} onClick={() => navigate(-1)}>
                         취소
                     </Button>
                     <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
+                        type={"submit"}
+                        color={"primary"}
+                        variant={"contained"}
                         disabled={isSubmitting}>
-                        {isSubmitting ? "수정 중..." : "수정 완료"}
+                        등록
                     </Button>
-                </ButtonGroup>
+                </AdminButtonGroup>
             </FormWrapper>
         </PostContainer>
     );
 }
 
 export default MyInquiryEditPage;
-
-// --- Styled Components ---
-
-const ButtonGroup = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    margin-top: 16px;
-`;

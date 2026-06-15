@@ -1,32 +1,36 @@
 import { createBrowserRouter, redirect } from "react-router";
 import HomePage from "../pages/HomePage.tsx";
+import SignInPage from "../pages/auth/signin/signInPage.tsx";
+import SignUpPage from "../pages/auth/signup/signUpPage.tsx";
 import MainLayout from "../layouts/MainLayout.tsx";
 import AdminLayout from "../layouts/AdminLayout.tsx";
 import AdminCategoryListPage from "../pages/admin/category/AdminCategoryListPage.tsx";
+import { useAuthStore } from "../stores/auth/authStore.ts";
 import { Role } from "../types/user.type.ts";
 import AdminCategoryCreatePage from "../pages/admin/category/create/AdminCategoryCreatePage.tsx";
+import AdminCategoryEditPage from "../pages/admin/category/edit/AdminCategoryEditPage.tsx";
+import AdminUserCreatePage from "../pages/admin/user/create/AdminUserCreatePage.tsx";
 import AdminUserListPage from "../pages/admin/user/AdminUserListPage.tsx";
+import AdminUserUpdatePage from "../pages/admin/user/update/AdminUserUpdatePage.tsx";
+import PostListPage from "../pages/post/PostListPage.tsx";
 import PostCreatePage from "../pages/post/create/PostCreatePage.tsx";
-import { useAuthStore } from "../stores/auth/AuthStore.ts";
-import PostListPage from "../pages/category/PostListPage.tsx";
-import SignInPage from "../pages/auth/signIn/SignInPage.tsx";
-import SignUpPage from "../pages/auth/signUp/SignUpPage.tsx";
-import AdminCategoryUpdatePage from "../pages/admin/category/update/AdminCategoryUpdatePage.tsx";
-import AdminUserCreatePage from "../pages/admin/user/create/adminUserCreatePage.tsx";
-import AdminUserUpdatePage from "../pages/admin/user/update/adminUserUpdatePage.tsx";
 import PostDetailPage from "../pages/post/detail/PostDetailPage.tsx";
-import AdminNoticeListPage from "../pages/admin/notice/AdminNoticeListPage.tsx";
-import AdminNoticeCreatePage from "../pages/admin/notice/create/AdminNoticeCreatePage.tsx";
-import AdminNoticeUpdatePage from "../pages/admin/notice/update/AdminNoticeUpdatePage.tsx";
+import AdminNoticeList from "../pages/admin/notice/AdminNoticeList.tsx";
+import AdminCreateNoticePage from "../pages/admin/notice/create/AdminCreateNoticePage.tsx";
 import AdminNoticeDetailPage from "../pages/admin/notice/detail/AdminNoticeDetailPage.tsx";
+import AdminNoticeUpdatePage from "../pages/admin/notice/update/AdminNoticeUpdatePage.tsx";
+import NoticeListPage from "../pages/notice/NoticeListPage.tsx";
+import NoticeDetailPage from "../pages/notice/detail/NoticeDetailPage.tsx";
 import AdminInquiryListPage from "../pages/admin/inquiry/AdminInquiryListPage.tsx";
-import AdminInquiryDetailPage from "../pages/admin/inquiry/detail/AdminInquiryDetailPage.tsx";
+import MyLayout from "../layouts/MyLayout.tsx";
+import MyInfoPage from "../pages/my/info/MyInfoPage.tsx";
 import MyInquiryListPage from "../pages/my/inquiry/MyInquiryListPage.tsx";
-import MyInquiryDetailPage from "../pages/my/inquiry/detail/MyInquiryDetailPage.tsx";
 import MyInquiryCreatePage from "../pages/my/inquiry/create/MyInquiryCreatePage.tsx";
+import MyInquiryDetailPage from "../pages/my/inquiry/detail/MyInquiryDetailPage.tsx";
 import MyInquiryEditPage from "../pages/my/inquiry/edit/MyInquiryEditPage.tsx";
-import MyProfilePage from "../pages/my/profile/MyProfilePage.tsx";
+import AdminInquiryDetailPage from "../pages/admin/inquiry/detail/AdminInquiryDetailPage.tsx";
 import MyPasswordPage from "../pages/my/password/MyPasswordPage.tsx";
+import MyWithdrawPage from "../pages/my/withdraw/MyWithdrawPage.tsx";
 
 // 회원의 권한에 따라 접근할 수 있는 주소를 판별하기 위해서
 // react-router 라이브러리에서는 "로더(loader)"라는 기능을 제공함
@@ -86,8 +90,8 @@ const router = createBrowserRouter([
             {
                 path: "post",
                 children: [
+                    { path: ":id", element: <PostDetailPage /> },
                     { path: "create/:categoryId", loader: userLoader, element: <PostCreatePage /> },
-                    { path: ":postId", element: <PostDetailPage /> },
                 ],
             },
             {
@@ -99,19 +103,26 @@ const router = createBrowserRouter([
                 ],
             },
             {
-                path: "my",
-                loader: userLoader,
+                path: "notice",
                 children: [
-                    { index: true, element: <MyProfilePage /> },
-                    { path: "profile", element: <MyProfilePage /> },
+                    { index: true, element: <NoticeListPage /> },
+                    { path: ":id", element: <NoticeDetailPage /> },
+                ],
+            },
+            {
+                path: "my",
+                element: <MyLayout />,
+                children: [
+                    { index: true, element: <MyInfoPage /> },
                     { path: "password", element: <MyPasswordPage /> },
+                    { path: "withdraw", element: <MyWithdrawPage /> },
                     {
                         path: "inquiry",
                         children: [
                             { index: true, element: <MyInquiryListPage /> },
-                            { path: ":inquiryId", element: <MyInquiryDetailPage /> },
                             { path: "create", element: <MyInquiryCreatePage /> },
-                            { path: "edit", element: <MyInquiryEditPage /> },
+                            { path: ":inquiryId", element: <MyInquiryDetailPage /> },
+                            { path: "edit/:inquiryId", element: <MyInquiryEditPage /> },
                         ],
                     },
                 ],
@@ -128,10 +139,11 @@ const router = createBrowserRouter([
                 children: [
                     { index: true, element: <AdminCategoryListPage /> },
                     { path: "create", element: <AdminCategoryCreatePage /> },
-                    { path: "edit/:id", element: <AdminCategoryUpdatePage /> },
+                    { path: "edit/:id", element: <AdminCategoryEditPage /> },
                 ],
             },
             {
+                // /admin/user
                 path: "user",
                 children: [
                     { index: true, element: <AdminUserListPage /> },
@@ -140,20 +152,20 @@ const router = createBrowserRouter([
                 ],
             },
             {
-                path: "inquiry",
+                // /admin/notice
+                path: "notice",
                 children: [
-                    { index: true, element: <AdminInquiryListPage /> },
-                    { path: "detail/:inquiryId", element: <AdminInquiryDetailPage /> },
-                    // 관리자는 문의글을 '생성'하지 않고 '답변'만 하므로 create는 필요 없습니다!
+                    { index: true, element: <AdminNoticeList /> },
+                    { path: "create", element: <AdminCreateNoticePage /> },
+                    { path: ":id", element: <AdminNoticeDetailPage /> },
+                    { path: "update/:id", element: <AdminNoticeUpdatePage /> },
                 ],
             },
             {
-                path: "notice",
+                path: "inquiry",
                 children: [
-                    { index: true, element: <AdminNoticeListPage /> },
-                    { path: "create", element: <AdminNoticeCreatePage /> },
-                    { path: "update/:id", element: <AdminNoticeUpdatePage /> },
-                    { path: "detail/:id", element: <AdminNoticeDetailPage /> },
+                    { index: true, element: <AdminInquiryListPage /> },
+                    { path: ":id", element: <AdminInquiryDetailPage /> },
                 ],
             },
         ],

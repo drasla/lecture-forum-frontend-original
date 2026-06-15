@@ -1,23 +1,25 @@
-import type { PaginationResponseType } from "../../types/common.type.ts";
 import axiosInstance from "../axiosInstance.ts";
 import type { Notice } from "../../types/notice.type.ts";
+import type { PaginationResponseType } from "../../types/common.type.ts";
 
-const getNotices = async (
-    page: number = 1,
-    size: number = 10,
-): Promise<PaginationResponseType<Notice>> => {
-    const response = await axiosInstance.get("/notice/list", {
-        params: { page, size },
+const getNoticeById = async (noticeId: number): Promise<Notice> => {
+    const response = await axiosInstance.get(`/notice/${noticeId}`);
+    return response.data.data;
+};
+
+const getNoticeList = async (page?: number, size?: number): Promise<
+    PaginationResponseType<Notice>
+> => {
+    const response = await axiosInstance.get(`/notice/list`, {
+        params: {
+            page,
+            size,
+        },
     });
     return response.data.data;
 };
 
-const getNoticeById = async (id: number): Promise<Notice> => {
-    const response = await axiosInstance.get(`/notice/${id}`);
-    return response.data.data;
-};
-
 export default {
-    getNotices,
     getNoticeById,
+    getNoticeList,
 };

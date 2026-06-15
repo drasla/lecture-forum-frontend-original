@@ -1,35 +1,48 @@
-import styled from "styled-components";
-import { AdminButtonGroup, AdminDetailContent } from "../admin/admin.style.tsx";
+import type { Inquiry } from "../../types/inquiry.type.ts";
+import {
+    AdminButtonGroup,
+    AnswerContent,
+    AnswerDisplay,
+    AnswerHeader,
+} from "../admin/admin.style.tsx";
 import Button from "../common/button/Button.tsx";
+import adminInquiryApi from "../../api/admin/adminInquiryApi.ts";
+import type { Dispatch, SetStateAction } from "react";
 
-interface AdminInquiryAnswerBoxProps {
-    answer: string;
-    answeredAt: string | null;
-    onEdit: () => void;
-    onDelete: () => Promise<void>;
+interface Props {
+    inquiry: Inquiry;
+    reload: () => Promise<void>;
+    setIsEdit: Dispatch<SetStateAction<boolean>>;
 }
 
-function AdminInquiryAnswerBox({
-    answer,
-    answeredAt,
-    onEdit,
-    onDelete,
-}: AdminInquiryAnswerBoxProps) {
+function AdminInquiryAnswerBox({ inquiry, reload, setIsEdit }: Props) {
+    const handleDeleteAnswer = async () => {
+        try {
+            await adminInquiryApi.deleteInquiryAnswer(inquiry.id);
+            // 글 상세 내용을 다시 받아와야 함
+            await reload();
+        } catch (error) {
+            console.log(error);
+            alert("관리자 답변 삭제 중 오류가 발생되었습니다.");
+        }
+    };
+
     return (
         <AnswerDisplay>
             <AnswerHeader>
                 <h4>관리자 답변</h4>
                 <small>
-                    답변일시: {answeredAt && new Date(answeredAt).toLocaleString("ko-KR")}
+                    답변일시 : {inquiry.answeredAt && new Date(inquiry.answeredAt).toLocaleString()}
                 </small>
             </AnswerHeader>
-            <AdminDetailContent className="answer-content">{answer}</AdminDetailContent>
 
-            <AdminButtonGroup $align="right" style={{ marginTop: "24px" }}>
-                <Button variant={"contained"} color="primary" onClick={onEdit}>
+            <AnswerContent className={"answer-content"}>{inquiry.answer}</AnswerContent>
+
+            <AdminButtonGroup $align={"right"} style={{ marginTop: "24px" }}>
+                <Button variant={"contained"} color={"warning"} onClick={() => setIsEdit(true)}>
                     답변 수정
                 </Button>
-                <Button variant="contained" color="error" onClick={onDelete}>
+                <Button variant={"contained"} color={"error"} onClick={handleDeleteAnswer}>
                     답변 삭제
                 </Button>
             </AdminButtonGroup>
@@ -38,34 +51,3 @@ function AdminInquiryAnswerBox({
 }
 
 export default AdminInquiryAnswerBox;
-
-// --- Styled Components ---
-
-const AnswerDisplay = styled.div`
-    display: flex;
-    flex-direction: column;
-
-    .answer-content {
-        padding: 16px 0 0 0;
-    }
-`;
-
-const AnswerHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px dashed ${({ theme }) => theme.colors.divider};
-    padding-bottom: 16px;
-
-    h4 {
-        margin: 0;
-        font-size: 18px;
-        color: ${({ theme }) => theme.colors.primary};
-        font-weight: 700;
-    }
-
-    small {
-        color: ${({ theme }) => theme.colors.secondary};
-        font-size: 14px;
-    }
-`;

@@ -8,5 +8,6 @@ export interface Reply {
     user: {
         id: number;
         nickname: string;
+        email: string;
     };
 }

@@ -1,12 +1,11 @@
-import { Outlet } from "react-router";
 import styled from "styled-components";
+import { Outlet } from "react-router";
 import AdminAside from "../components/layout/admin/AdminAside.tsx";
 
 function AdminLayout() {
     return (
         <AdminContainer>
             <AdminAside />
-
             <AdminMain>
                 <AdminContentInner>
                     <Outlet />
@@ -18,13 +17,12 @@ function AdminLayout() {
 
 export default AdminLayout;
 
-// --- Styled Components ---
-
 const AdminContainer = styled.div`
     display: flex;
-    height: 100vh;
-    background-color: ${({ theme }) => theme.colors.background.default};
+    min-height: 100dvh;
+    background-color: ${props => props.theme.colors.background.default};
 `;
+
 
 const AdminMain = styled.main`
     flex: 1;

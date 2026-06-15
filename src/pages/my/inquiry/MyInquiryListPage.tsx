@@ -1,149 +1,112 @@
-import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import styled from "styled-components";
-import inquiryApi from "../../../api/user/inquiryApi.ts";
+import { useEffect, useState } from "react";
 import type { Inquiry } from "../../../types/inquiry.type.ts";
-
+import inquiryApi from "../../../api/user/inquiryApi.ts";
+import { BoardTable, BoardTd, BoardTh, BoardWrapper, LoadingText, PostContainer, PostPageHeader, PostTitle } from "../../../components/post/post.style.tsx";
 import Button from "../../../components/common/button/Button.tsx";
-import Badge from "../../../components/common/badge/Badge.tsx";
 import Pagination from "../../../components/common/pagination/Pagination.tsx";
-
-// 💡 as 키워드 없이 선언된 이름 그대로 임포트합니다.
-import {
-    PostContainer,
-    PostPageHeader,
-    PostTitle,
-    BoardWrapper,
-    BoardTable,
-    BoardTh,
-    BoardTd,
-    LoadingText,
-} from "../../../components/post/post.style.tsx";
 
 function MyInquiryListPage() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const page = Number(searchParams.get("page")) || 1;
+    const size = Number(searchParams.get("size")) | 20;
+
+    const [list, setList] = useState<Inquiry[]>([]);
     const [total, setTotal] = useState(0);
-
-    const size = 10;
-    const pageParam = searchParams.get("page");
-    const page = pageParam ? Number(pageParam) : 1;
-
-    const loadInquiries = async (currentPage: number) => {
-        setIsLoading(true);
-        try {
-            const data = await inquiryApi.getInquiryList(currentPage, size);
-            setInquiries(data.list);
-            setTotal(data.total);
-        } catch (error) {
-            console.error(error);
-            alert("나의 문의 내역을 불러오는데 실패했습니다.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handlePageChange = (newPage: number) => {
-        searchParams.set("page", newPage.toString());
-        setSearchParams(searchParams);
-    };
+    const [isLoading, setIsLoading] = useState(true);
+    const totalPage = Math.ceil(total / size);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        loadInquiries(page).then(() => {});
-    }, [page]);
+        const loadList = async () => {
+            try {
+                const result = await inquiryApi.getMyInquiryList(page, size);
+                setList(result.list);
+                setTotal(result.total);
+            } catch (error) {
+                console.log(error);
+                alert("게시글을 불러오는 중 오류가 발생했습니다.");
+            } finally {
+                setIsLoading(false);
+            }
+        }
 
-    const totalPages = Math.ceil(total / size) || 1;
+        window.scrollTo({ top: 0, behavior: "smooth"});
+        loadList().then(() => {});
+    }, [page, size]);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams);
+    };
 
     return (
         <PostContainer>
             <PostPageHeader>
                 <PostTitle>
-                    1:1 문의 내역 <small>관리자에게 남긴 문의를 확인하세요</small>
+                    게시판 <small>총 {total}개의 글</small>
                 </PostTitle>
-                <Button variant="contained" color="primary" as={Link} to="/my/inquiry/create">
-                    + 1:1 문의하기
+                <Button
+                        color={"primary"}
+                        variant={"contained"}
+                        as={Link}
+                        to={`/my/inquiry/create`}>
+                        문의남기기
                 </Button>
             </PostPageHeader>
 
             <BoardWrapper>
                 {isLoading ? (
-                    <LoadingText>문의 내역을 불러오는 중입니다...</LoadingText>
+                    <LoadingText>게시글을 불러오는 중입니다</LoadingText>
                 ) : (
                     <BoardTable>
                         <thead>
                             <tr>
-                                <BoardTh $width="10%">번호</BoardTh>
-                                <BoardTh $width="15%">상태</BoardTh>
-                                <BoardTh $width="55%">문의 제목</BoardTh>
-                                <BoardTh $width="20%">등록일</BoardTh>
+                                <BoardTh $width={"10%"}>번호</BoardTh>
+                                <BoardTh>제목</BoardTh>
+                                <BoardTh $width={"15%"}>작성일</BoardTh>
+                                <BoardTh $width={"10%"}>답변</BoardTh>
                             </tr>
                         </thead>
                         <tbody>
-                            {inquiries.length === 0 ? (
+                            {list.length === 0 && (
                                 <tr>
                                     <BoardTd colSpan={4} style={{ padding: "100px 0" }}>
-                                        작성하신 1:1 문의 내역이 없습니다.
+                                        아직 작성된 게시글이 없습니다. 첫 글을 남겨보세요!
                                     </BoardTd>
                                 </tr>
-                            ) : (
-                                inquiries.map(inquiry => (
-                                    <tr key={inquiry.id}>
-                                        <BoardTd>{inquiry.id}</BoardTd>
-                                        <BoardTd>
-                                            <Badge color={inquiry.answer ? "success" : "default"}>
-                                                {inquiry.answer ? "답변 완료" : "답변 대기"}
-                                            </Badge>
-                                        </BoardTd>
-                                        <BoardTd className="title-cell">
-                                            {/* 💡 제목 클릭 시 상세 페이지로 이동 */}
-                                            <StyledLink to={`/my/inquiry/${inquiry.id}`}>
-                                                {inquiry.title}
-                                            </StyledLink>
-                                        </BoardTd>
-                                        <BoardTd>
-                                            {new Date(inquiry.createdAt).toLocaleDateString(
-                                                "ko-KR",
-                                                {
-                                                    year: "numeric",
-                                                    month: "2-digit",
-                                                    day: "2-digit",
-                                                },
-                                            )}
-                                        </BoardTd>
-                                    </tr>
-                                ))
                             )}
+                            {list.map(item => (
+                                <tr key={item.id}>
+                                    <BoardTd>{item.id}</BoardTd>
+                                    <BoardTd className={"title-cell"}>
+                                        <Link to={`/my/inquiry/${item.id}`}>{item.title}</Link>
+                                    </BoardTd>
+                                    <BoardTd>
+                                        {/*
+                                             Date 클래스의 메서드 중 toLocalString()은
+                                             해당 날짜를 사용자의 지역 시간에 맞게 문자열로 변환하는 메서드
+                                             매개변수를 생략하면 자동으로 보는 사용자에 맞춰 제공됨
+                                             .toLocaleString(해당 지역, 옵션 객체)
+                                        */}
+                                        {new Date(item.createdAt).toLocaleString("ko-KR", {
+                                            year: "numeric",
+                                            month: "2-digit",
+                                            day: "2-digit",
+                                        })}
+                                    </BoardTd>
+                                    <BoardTd>
+                                        {item.answer ? "답변완료" : "답변대기"}
+                                    </BoardTd>
+                                </tr>
+                            ))}
                         </tbody>
                     </BoardTable>
                 )}
             </BoardWrapper>
 
-            {total > 0 && (
-                <Pagination
-                    currentPage={page}
-                    totalPage={totalPages}
-                    onPageChange={handlePageChange}
-                    maxVisiblePages={5}
-                />
-            )}
+            <Pagination currentPage={page} totalPage={totalPage} onPageChange={onPageChange} />
         </PostContainer>
     );
 }
 
 export default MyInquiryListPage;
-
-// --- Styled Components (해당 페이지 전용) ---
-
-const StyledLink = styled(Link)`
-    font-weight: 500;
-    color: ${({ theme }) => theme.colors.text.default};
-    text-decoration: none;
-    transition: color 0.2s;
-
-    &:hover {
-        color: ${({ theme }) => theme.colors.primary};
-        text-decoration: underline;
-    }
-`;

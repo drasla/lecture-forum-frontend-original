@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Post } from "../../../types/post.type.ts";
 import { useNavigate, useParams } from "react-router";
 import postApi from "../../../api/user/postApi.ts";
-import { useAuthStore } from "../../../stores/auth/AuthStore.ts";
-import type { Post } from "../../../types/post.type.ts";
-import Button from "../../../components/common/button/Button.tsx";
-import { AdminButtonGroup } from "../../../components/admin/admin.style.tsx";
 import {
     DetailContent,
     DetailHeader,
@@ -14,23 +11,34 @@ import {
     LoadingText,
     PostContainer,
 } from "../../../components/post/post.style.tsx";
+import { useAuthStore } from "../../../stores/auth/authStore.ts";
+import { AdminButtonGroup } from "../../../components/admin/admin.style.tsx";
+import Button from "../../../components/common/button/Button.tsx";
 import PostVote from "../../../components/post/PostVote.tsx";
 import PostReply from "../../../components/post/PostReply.tsx";
 
 function PostDetailPage() {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const { user } = useAuthStore();
-
     const [post, setPost] = useState<Post | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const { id } = useParams<{ id: string }>();
+    const { user } = useAuthStore();
+
+    // 글 내용을 백엔드에게 불러오는 행위를 useEffect 밖에서 하기 위해
+    // loadPost 함수를 밖으로 빼게되면,
+    // useEffect() 밖에서 만든 함수를 useEffect 안에서 실행할 경우
+    // state 내용이 바뀌는 행동을 React가 하게 되므로 문법적으로 잘못되었다고 하는 것
+
+    // 이 문법 오류를 해결하기 위해서는 useCallback() 리액트 훅을 사용
+    // useCallback 사용은 useEffect와 동일하게 사용
+    // useCallback(함수, 의존성배열)
     const loadPost = useCallback(async () => {
         try {
             const data = await postApi.fetchPostById(Number(id));
             setPost(data);
         } catch (error) {
-            console.error(error);
+            console.log(error);
             alert("게시글을 불러오는 중 오류가 발생했습니다.");
             navigate(-1);
         } finally {
@@ -39,8 +47,9 @@ function PostDetailPage() {
     }, [id, navigate]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadPost().then(() => {});
-    }, [loadPost]);
+    }, [id, loadPost]);
 
     if (isLoading) {
         return (
@@ -50,12 +59,11 @@ function PostDetailPage() {
         );
     }
 
-    if (!post) return null;
+    if (!post) return;
 
     return (
         <PostContainer>
             <DetailWrapper>
-                {/* 1. 게시글 헤더 영역 */}
                 <DetailHeader>
                     <DetailTitle>{post.title}</DetailTitle>
                     <DetailInfo>
@@ -79,13 +87,10 @@ function PostDetailPage() {
                     </DetailInfo>
                 </DetailHeader>
 
-                {/* 2. 게시글 본문 영역 */}
                 <DetailContent>{post.content}</DetailContent>
 
-                {/* 💡 3. 분리된 투표 영역 컴포넌트 마운트 */}
-                <PostVote post={post} postId={Number(id)} onRefresh={loadPost} />
+                <PostVote post={post} loadPost={loadPost} />
 
-                {/* 4. 하단 제어 버튼 그룹 */}
                 <AdminButtonGroup style={{ marginTop: "40px" }}>
                     <Button color={"secondary"} variant={"contained"} onClick={() => navigate(-1)}>
                         목록으로
@@ -103,8 +108,7 @@ function PostDetailPage() {
                     )}
                 </AdminButtonGroup>
 
-                {/* 💡 5. 분리된 댓글 영역 컴포넌트 마운트 */}
-                <PostReply postId={Number(id)} />
+                <PostReply postId={post.id} />
             </DetailWrapper>
         </PostContainer>
     );

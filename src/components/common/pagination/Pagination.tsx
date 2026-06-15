@@ -1,57 +1,46 @@
 import styled from "styled-components";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-interface PaginationProps {
-    currentPage: number; // 현재 페이지 번호
-    totalPage: number; // 전체 페이지 개수
-    onPageChange: (page: number) => void; // 페이지 변경 시 실행할 함수
-    maxVisiblePages?: number; // 한 번에 보여줄 페이지 번호 개수 (기본값: 5)
-}
+type Props = {
+    currentPage: number; // 지금 현재 페이지 번호
+    totalPage: number; // 총 페이지 매수
+    onPageChange: (page: number) => void;
+    maxVisiblePages?: number;
+};
 
-function Pagination({
-    currentPage,
-    totalPage,
-    onPageChange,
-    maxVisiblePages = 5,
-}: PaginationProps) {
-    if (totalPage <= 1) return null; // 페이지가 1개 이하면 페이지네이션을 숨깁니다.
+function Pagination({ currentPage, totalPage, onPageChange, maxVisiblePages = 5 }: Props) {
+    if (totalPage <= 1) {
+        return null;
+    }
 
-    // 💡 현재 페이지가 속한 블록의 시작과 끝 페이지 계산 (예: 1~5, 6~10)
+    // 현재 페이지가 속한 블록 구함
     const currentBlock = Math.ceil(currentPage / maxVisiblePages);
-    const startPage = (currentBlock - 1) * maxVisiblePages + 1;
-    const endPage = Math.min(startPage + maxVisiblePages - 1, totalPage);
+    // 13번 페이지를 보고 있는데 maxVisiblePage 5개라고 했다면
+    // 13 / 5 = 올림하면 3
+    // 블록 구성은 1 ~ 5, 6 ~ 10, 11 ~ 15 로 되므로 3번 블록에 속한다가 됨
+    const startPage = (currentBlock - 1) * maxVisiblePages + 1; // 11번 페이지가 시작이구나
+    // Math.min() 매개변수에 제공되는 숫자들 중에 작은 값을 구하는 메서드
+    const endPage = Math.min(startPage + maxVisiblePages - 1, totalPage); // 15번 페이지가 되는구나
 
-    // 보여줄 페이지 번호 배열 생성
-    const pageNumbers = [];
+    const pageNumber = [];
     for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
+        pageNumber.push(i); // [1, 2, 3, 4, 5]
     }
 
     return (
         <PaginationContainer>
-            {/* 이전 블록 이동 버튼 */}
-            <ArrowButton
-                disabled={currentPage === 1}
-                onClick={() => onPageChange(currentPage - 1)}
-                aria-label="이전 페이지">
+            <ArrowButton disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}>
                 <FiChevronLeft size={18} />
             </ArrowButton>
-
-            {/* 페이지 숫자 번호 목록 */}
-            {pageNumbers.map(page => (
+            {pageNumber.map(item => (
                 <PageNumButton
-                    key={page}
-                    $isActive={page === currentPage}
-                    onClick={() => onPageChange(page)}>
-                    {page}
+                    key={item}
+                    $isActive={item === currentPage}
+                    onClick={() => onPageChange(item)}>
+                    {item}
                 </PageNumButton>
             ))}
-
-            {/* 다음 블록 이동 버튼 */}
-            <ArrowButton
-                disabled={currentPage === totalPage}
-                onClick={() => onPageChange(currentPage + 1)}
-                aria-label="다음 페이지">
+            <ArrowButton disabled={currentPage === totalPage} onClick={() => onPageChange(currentPage + 1)}>
                 <FiChevronRight size={18} />
             </ArrowButton>
         </PaginationContainer>
@@ -59,8 +48,6 @@ function Pagination({
 }
 
 export default Pagination;
-
-// --- Styled Components ---
 
 const PaginationContainer = styled.nav`
     display: flex;
@@ -79,22 +66,21 @@ const PageNumButton = styled.button<{ $isActive: boolean }>`
     padding: 0 6px;
     font-size: 14px;
     font-weight: 600;
-    border: 1px solid ${props => (props.$isActive ? props.theme.colors.primary : "transparent")};
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    /* 💡 활성화 상태(현재 페이지) 스타일 설정 */
+    border: 1px solid
+        ${props => (props.$isActive ? props.theme.colors.primary : props.theme.colors.divider)};
     background-color: ${props =>
         props.$isActive ? props.theme.colors.primary : props.theme.colors.background.paper};
     color: ${props => (props.$isActive ? "#FFFFFF" : props.theme.colors.text.default)};
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
 
     &:hover {
         ${props =>
             !props.$isActive &&
             `
-            background-color: ${props.theme.colors.background.default};
-            color: ${props.theme.colors.primary};
+        background-color: ${props.theme.colors.background.default};
+        color: ${props.theme.colors.primary};
         `}
     }
 `;
@@ -103,25 +89,27 @@ const ArrowButton = styled.button`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 36px;
+    min-width: 36px;
     height: 36px;
-    background-color: ${({ theme }) => theme.colors.background.paper};
-    border: 1px solid ${({ theme }) => theme.colors.divider};
+    padding: 0 6px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.divider};
+    background-color: ${props => props.theme.colors.background.paper};
+    color: ${props => props.theme.colors.text.default};
     border-radius: 6px;
-    color: ${({ theme }) => theme.colors.text.default};
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 
-    &:hover:not(:disabled) {
-        background-color: ${({ theme }) => theme.colors.background.default};
-        color: ${({ theme }) => theme.colors.primary};
-        border-color: ${({ theme }) => theme.colors.divider};
+    &:hover {
+        background-color: ${props => props.theme.colors.background.default};
+        color: ${props => props.theme.colors.primary};
     }
-
+    
     &:disabled {
-        color: ${({ theme }) => theme.colors.text.disabled};
-        background-color: ${({ theme }) => theme.colors.background.paper};
-        border-color: ${({ theme }) => theme.colors.divider};
+        color: ${props => props.theme.colors.text.disabled};
+        background-color: ${props => props.theme.colors.background.paper};
+        border-color: ${props => props.theme.colors.divider};
         cursor: not-allowed;
         opacity: 0.6;
     }

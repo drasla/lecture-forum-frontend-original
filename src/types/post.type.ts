@@ -1,4 +1,5 @@
-import { type User } from "./user.type.ts"; // User 타입 임포트
+import type { User } from "./user.type.ts";
+import type { Category } from "./category.type.ts";
 
 export interface Post {
     id: number;
@@ -10,16 +11,22 @@ export interface Post {
     views: number;
     userId: number;
     categoryId: number;
+    option1Text: string | null;
+    option2Text: string | null;
+    // Generic Type 중 Pick 이라는 타입이 존재
+    // Pick<해당 타입, 가져올 항목들>
     user: Pick<User, "id" | "nickname" | "email">;
-
-    option1Text?: string | null;
-    option2Text?: string | null;
-
-    // 💡 서비스에서 새로 추가해준 집계 및 투표 여부 데이터
+    // vote라는 프로퍼티(항목)은
+    // 글 내용에서만 있고 글 목록에서는 없는 항목임
+    // 그렇기 때문에 union을 써서 null 일 수 있음을 고지
     vote: {
         option1Count: number;
         option2Count: number;
         totalCount: number;
-        hasVoted: boolean; // 로그인 유저의 투표 참여 여부
+        hasVoted: boolean;
     } | null;
+}
+
+export type RecentPost = Post & {
+    category: Pick<Category, "id" | "name">
 }

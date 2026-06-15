@@ -1,35 +1,32 @@
-import { Outlet } from "react-router";
 import styled from "styled-components";
 import MyAside from "../components/layout/my/MyAside.tsx";
+import { Outlet } from "react-router";
 
 function MyLayout() {
     return (
-        <LayoutContainer>
-            {/* 좌측 마이페이지 사이드바 */}
-            <MyAside />
+        <MyLayoutContainer>
+            <div>
+                <MyAside />
+            </div>
 
-            {/* 우측 메인 콘텐츠 영역 */}
             <ContentArea>
                 <Outlet />
             </ContentArea>
-        </LayoutContainer>
+        </MyLayoutContainer>
     );
 }
 
 export default MyLayout;
 
-// --- Styled Components ---
-
-const LayoutContainer = styled.div`
+const MyLayoutContainer = styled.div`
     display: flex;
-    min-height: 100vh;
-    background-color: ${({ theme }) => theme.colors.background.default};
+    gap: 30px;
+    min-height: calc(100dvh - 64px - 50px);
+    background-color: ${props => props.theme.colors.background.default};
 `;
 
-const ContentArea = styled.main`
+const ContentArea = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 40px;
-    overflow-y: auto; /* 내용이 길어지면 우측 영역만 스크롤되도록 처리 */
 `;

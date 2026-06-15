@@ -1,19 +1,19 @@
+import type { NoticeInputType } from "../../schemas/notice/noticeSchema.ts";
 import axiosInstance from "../axiosInstance.ts";
 import type { Notice } from "../../types/notice.type.ts";
-import type { NoticeInputType } from "../../schemas/admin/notice/noticeSchema.ts"; // 💡 Zod 타입 임포트
 
-const createNotice = async (data: NoticeInputType): Promise<Notice> => {
-    const response = await axiosInstance.post("/admin/notice/create", data);
+const createNotice = async (input: NoticeInputType): Promise<Notice> => {
+    const response = await axiosInstance.post("/admin/notice/create", input);
     return response.data.data;
 };
 
-const updateNotice = async (id: number, data: NoticeInputType): Promise<Notice> => {
-    const response = await axiosInstance.patch(`/admin/notice/${id}`, data);
+const updateNotice = async (noticeId: number, input: NoticeInputType): Promise<Notice> => {
+    const response = await axiosInstance.patch(`/admin/notice/${noticeId}`, input);
     return response.data.data;
 };
 
-const deleteNotice = async (id: number): Promise<void> => {
-    await axiosInstance.delete(`/admin/notice/${id}`);
+const deleteNotice = async (noticeId: number): Promise<void> => {
+    await axiosInstance.delete(`/admin/notice/${noticeId}`);    // HTTP status 200 성공/ HTTP status 500 실패
 };
 
 export default {

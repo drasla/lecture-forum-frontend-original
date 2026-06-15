@@ -1,60 +1,71 @@
 import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Link } from "react-router";
-import Button from "../../../components/common/button/Button";
-import type { Category } from "../../../types/category.type.ts";
 import adminCategoryApi from "../../../api/admin/adminCategoryApi.ts";
-import { FiEdit, FiRefreshCcw, FiTrash2 } from "react-icons/fi";
+import { type Category, CategoryStatus } from "../../../types/category.type.ts";
+import Button from "../../../components/common/button/Button.tsx";
+import { Link } from "react-router";
+import Card from "../../../components/common/card/Card.tsx";
 import {
+    AdminButtonGroup,
     AdminContainer,
     AdminLoadingText,
     AdminPageHeader,
+    AdminTable,
+    AdminTableWrapper,
+    AdminTd,
+    AdminTh,
     AdminTitle,
 } from "../../../components/admin/admin.style.tsx";
 import Badge from "../../../components/common/badge/Badge.tsx";
-import Card from "../../../components/common/card/Card.tsx";
+import { FiEdit, FiRefreshCcw, FiTrash2 } from "react-icons/fi";
 
 function AdminCategoryListPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // useEffect 안에서 비동기함수를 async - await 방법으로 사용할거라면
+        // 함수를 만들어서 감싸주고, 그걸 실행하도록 문법에 맞춰 적음
+        // 그리고 그 함수 실행 역시 비동기함수에 대한 실행이기 때문에
+        // then(() => {})      아무것도 안하는 then을 붙여줌
+
         const loadCategories = async () => {
             try {
                 const data = await adminCategoryApi.fetchCategoryList();
                 setCategories(data);
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 alert("카테고리 목록을 불러오는데 실패했습니다.");
             } finally {
                 setIsLoading(false);
             }
         };
+
         loadCategories().then(() => {});
     }, []);
 
-    const handleToggleStatus = async (id: number, currentStatus: string) => {
-        const actionText = currentStatus === "ACTIVE" ? "비활성화(숨김)" : "활성화";
-
-        if (!window.confirm(`정말 이 카테고리를 ${actionText} 처리하시겠습니까?`)) {
-            return;
-        }
-
+    const handleToggleCategoryStatus = async (id: number) => {
+        // 백엔드에게 그 카테고리의 status를 바꿔줘 -> 함수 실행할 때 id를 받아야 함
         try {
-            await adminCategoryApi.toggleCategoryStatus(id);
-            alert(`카테고리가 성공적으로 ${actionText} 되었습니다.`);
+            const result = await adminCategoryApi.toggleCategoryStatus(id);
+            alert(`카테고리가 성공적으로 ${result.status}로 변경되었습니다.`);
 
-            // 💡 서버에서 목록을 다시 불러오지 않고, 프론트엔드의 상태만 즉시 업데이트하여 성능 최적화
-            setCategories(prevCategories =>
-                prevCategories.map(cat =>
-                    cat.id === id
-                        ? { ...cat, status: cat.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }
-                        : cat,
-                ),
+            // 변경 작업을 하게 되면, 진짜 "변경"만 끝나는거지,
+            // 우리가 화면에 출력해주는 categories의 데이터는 변하지 않음
+            // 1. 전체 목록을 다시 백엔드에게 요청해서 받아와서 categories의 내용을 바꿔주던지
+            //     -> 장점 : 화면에 출력되는 내용이 백엔드가 "진짜" 제공해준 내용으로 바꿔주므로 데이터가 진실됨
+            //     -> 단점 : 목록을 다시 백엔드에게 요청해야 하므로, 백엔드가 응답이 오는데 시간이 걸림
+            // 2. 백엔드에게 목록을 요청하지 않고, 화면의 데이터만 교체해줄 것임
+            //    2번이 진행이 가능한 이유 : toggleCategoryStatus() 실행하면 진실된 "해당" 변경 정보는 백엔드가 주기 때문
+            //    -> 장점 : 백엔드가 두 번 일하지 않고서, 사용자에게 비교적 진실된 정보를 출력해줄 수 있음
+
+            // 내가 현재 갖고있는 목록이 저장된 categories 중,
+            // 변경 작업이 이루어진 id가 동일한 항목에 대해서만 result를 가지고 status를 바꿔주겠다
+            setCategories(prev =>
+                prev.map(item => (item.id === id ? { ...item, status: result.status } : item)),
             );
         } catch (error) {
-            console.error(error);
-            alert("상태 변경 중 오류가 발생했습니다.");
+            console.log(error);
+            alert("카테고리 변경 중 오류가 발생되었습니다.");
         }
     };
 
@@ -62,7 +73,11 @@ function AdminCategoryListPage() {
         <AdminContainer>
             <AdminPageHeader>
                 <AdminTitle>카테고리 관리</AdminTitle>
-                <Button variant="contained" color="primary" as={Link} to="/admin/category/create">
+                <Button
+                    color={"primary"}
+                    variant={"contained"}
+                    as={Link}
+                    to={"/admin/category/create"}>
                     + 카테고리 추가
                 </Button>
             </AdminPageHeader>
@@ -71,81 +86,70 @@ function AdminCategoryListPage() {
                 {isLoading ? (
                     <AdminLoadingText>불러오는 중...</AdminLoadingText>
                 ) : (
-                    <TableWrapper>
-                        <Table>
+                    <AdminTableWrapper>
+                        <AdminTable>
                             <thead>
                                 <tr>
-                                    <Th $width="10%">ID</Th>
-                                    <Th $width="65%">카테고리명</Th>
-                                    <Th $width="15%">상태</Th>
-                                    <Th $width="15%">관리</Th>
+                                    <AdminTh $width={"10%"}>ID</AdminTh>
+                                    <AdminTh $width={"65%"}>카테고리명</AdminTh>
+                                    <AdminTh $width={"15%"}>상태</AdminTh>
+                                    <AdminTh $width={"15%"}>관리</AdminTh>
                                 </tr>
                             </thead>
                             <tbody>
-                                {categories.length === 0 ? (
+                                {categories.length === 0 && (
                                     <tr>
-                                        <Td
+                                        <AdminTd
                                             colSpan={4}
-                                            style={{ textAlign: "center", padding: "32px" }}>
+                                            style={{ textAlign: "center", padding: "100px" }}>
                                             등록된 카테고리가 없습니다.
-                                        </Td>
+                                        </AdminTd>
                                     </tr>
-                                ) : (
-                                    categories.map(cat => (
-                                        <tr key={cat.id}>
-                                            <Td>{cat.id}</Td>
-                                            <Td>
-                                                <strong>{cat.name}</strong>
-                                            </Td>
-                                            <Td>
-                                                <Badge
-                                                    color={
-                                                        cat.status === "ACTIVE"
-                                                            ? "primary"
-                                                            : "default"
-                                                    }>
-                                                    {cat.status === "ACTIVE" ? "활성" : "비활성"}
-                                                </Badge>
-                                            </Td>
-                                            <Td>
-                                                <ButtonGroup>
-                                                    <Button
-                                                        variant="icon"
-                                                        color="primary"
-                                                        title="수정"
-                                                        as={Link}
-                                                        to={`/admin/category/edit/${cat.id}`}>
-                                                        <FiEdit size={18} />
-                                                    </Button>
-                                                    <Button
-                                                        variant="icon"
-                                                        color={
-                                                            cat.status === "ACTIVE"
-                                                                ? "error"
-                                                                : "primary"
-                                                        }
-                                                        onClick={() =>
-                                                            handleToggleStatus(cat.id, cat.status)
-                                                        }
-                                                        title={
-                                                            cat.status === "ACTIVE"
-                                                                ? "비활성화"
-                                                                : "활성화"
-                                                        }>
-                                                        {cat.status === "ACTIVE" ? (
-                                                            <FiTrash2 size={18} />
-                                                        ) : (
-                                                            <FiRefreshCcw size={18} />
-                                                        )}
-                                                    </Button>
-                                                </ButtonGroup>
-                                            </Td>
-                                        </tr>
-                                    ))
                                 )}
+                                {categories.map(item => (
+                                    <tr key={item.id}>
+                                        <AdminTd>{item.id}</AdminTd>
+                                        <AdminTd>{item.name}</AdminTd>
+                                        <AdminTd>
+                                            <Badge
+                                                color={
+                                                    item.status === CategoryStatus.ACTIVE
+                                                        ? "success"
+                                                        : "secondary"
+                                                }>
+                                                {item.status === CategoryStatus.ACTIVE
+                                                    ? "활성"
+                                                    : "비활성"}
+                                            </Badge>
+                                        </AdminTd>
+                                        <AdminTd>
+                                            <AdminButtonGroup $align={"left"}>
+                                                <Button
+                                                    color={"primary"}
+                                                    variant={"icon"}
+                                                    as={Link}
+                                                    to={`/admin/category/edit/${item.id}`}>
+                                                    <FiEdit />
+                                                </Button>
+                                                <Button
+                                                    color={"primary"}
+                                                    variant={"icon"}
+                                                    onClick={() =>
+                                                        handleToggleCategoryStatus(item.id)
+                                                    }>
+                                                    {item.status === CategoryStatus.ACTIVE ? (
+                                                        <FiTrash2 size={18} />
+                                                    ) : (
+                                                        <FiRefreshCcw size={18} />
+                                                    )}
+                                                </Button>
+                                            </AdminButtonGroup>
+                                        </AdminTd>
+                                    </tr>
+                                ))}
                             </tbody>
-                        </Table>
-                    </TableWrapper>
+                        </AdminTable>
+                    </AdminTableWrapper>
                 )}
             </Card>
         </AdminContainer>
@@ -153,37 +157,3 @@ function AdminCategoryListPage() {
 }
 
 export default AdminCategoryListPage;
-
-const TableWrapper = styled.div`
-    overflow-x: auto;
-`;
-
-const Table = styled.table`
-    width: 100%;
-    border-collapse: collapse;
-`;
-
-const Th = styled.th<{ $width?: string }>`
-    width: ${({ $width }) => $width || "auto"}; /* $width가 있으면 적용, 없으면 auto */
-    text-align: left;
-    padding: 12px 16px;
-    background-color: ${({ theme }) => theme.colors.background.default};
-    color: ${({ theme }) => theme.colors.text.disabled};
-    font-size: 13px;
-    font-weight: 600;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.divider};
-`;
-
-const Td = styled.td`
-    padding: 16px;
-    font-size: 14px;
-    color: ${({ theme }) => theme.colors.text.default};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.divider};
-    vertical-align: middle;
-`;
-
-const ButtonGroup = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-`;

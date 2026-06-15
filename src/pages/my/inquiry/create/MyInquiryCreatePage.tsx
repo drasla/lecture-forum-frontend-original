@@ -1,19 +1,17 @@
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import styled from "styled-components";
-
+import { type InquiryInputType, inquirySchema } from "../../../../schemas/inquiry/inquirySchema.ts";
+import inquiryApi from "../../../../api/user/inquiryApi.ts";
 import {
+    FormWrapper,
     PostContainer,
     PostPageHeader,
     PostTitle,
-    FormWrapper,
-    FormDivider,
 } from "../../../../components/post/post.style.tsx";
-import { type InquiryInputType, inquirySchema } from "../../../../schemas/inquiry/inquirySchema.ts";
-import inquiryApi from "../../../../api/user/inquiryApi.ts";
 import InputGroup from "../../../../components/common/input/InputGroup.tsx";
 import TextareaGroup from "../../../../components/common/textarea/TextareaGroup.tsx";
+import { AdminButtonGroup } from "../../../../components/admin/admin.style.tsx";
 import Button from "../../../../components/common/button/Button.tsx";
 
 function MyInquiryCreatePage() {
@@ -23,18 +21,21 @@ function MyInquiryCreatePage() {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<InquiryInputType>({
+    } = useForm({
         resolver: zodResolver(inquirySchema),
+        mode: "onBlur",
     });
 
-    const onSubmit = async (data: InquiryInputType) => {
+    const onSubmit = async (input: InquiryInputType) => {
         try {
-            await inquiryApi.createInquiry(data);
-            alert("1:1 문의가 성공적으로 등록되었습니다.");
-            navigate("/my/inquiry", { replace: true });
+            const result = await inquiryApi.createInquiry(input);
+
+            // 이 사람이 등록을 요청했을 때, 등록을 한 후, 지금 등록된 그 문의 글 상세 페이지로 이동시키려면
+            // 문의 ID 가 필요함. 그걸 위해서는 inquiryApi.createInquiry() 를 한 결과를 받아놔야 됨
+            navigate(`/my/inquiry/${result.id}`);
         } catch (error) {
-            console.error("문의글 등록 실패:", error);
-            alert("문의글 등록 중 오류가 발생했습니다.");
+            console.log(error);
+            alert("게시글 등록에 실패했습니다.");
         }
     };
 
@@ -42,60 +43,43 @@ function MyInquiryCreatePage() {
         <PostContainer>
             <PostPageHeader>
                 <PostTitle>
-                    1:1 문의 작성 <small>궁금한 점이나 불편하신 점을 남겨주세요.</small>
+                   1:1 문의 등록 <small>빠른 시간 안에 답변을 드리도록 노력하겠습니다.</small>
                 </PostTitle>
             </PostPageHeader>
 
             <FormWrapper onSubmit={handleSubmit(onSubmit)}>
                 <InputGroup
-                    id="title"
-                    label="문의 제목"
-                    placeholder="문의하실 내용의 제목을 입력해주세요."
+                    label={"문의 제목"}
+                    id={"title"}
+                    placeholder={"문의 사항의 제목을 입력해주세요"}
                     errorMessage={errors.title?.message}
                     registerObj={register("title")}
                 />
-
-                <FormDivider />
-
                 <TextareaGroup
-                    id="content"
-                    label="문의 내용"
-                    placeholder="관리자가 정확하게 답변할 수 있도록 문의 내용을 상세히 적어주세요."
+                    label={"문의 내용"}
+                    id={"content"}
+                    placeholder={
+                        "발생된 문제점에 대해 자세히 입력해주세요."
+                    }
                     errorMessage={errors.content?.message}
                     registerObj={register("content")}
-                    style={{ minHeight: "300px" }}
                 />
 
-                <ButtonGroup>
-                    <Button
-                        type="button"
-                        variant="text"
-                        color="secondary"
-                        onClick={() => navigate(-1)}
-                        disabled={isSubmitting}>
+                <AdminButtonGroup>
+                    <Button color={"primary"} variant={"text"} onClick={() => navigate(-1)}>
                         취소
                     </Button>
                     <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
+                        type={"submit"}
+                        color={"primary"}
+                        variant={"contained"}
                         disabled={isSubmitting}>
-                        {isSubmitting ? "등록 중..." : "문의 등록하기"}
+                        등록
                     </Button>
-                </ButtonGroup>
+                </AdminButtonGroup>
             </FormWrapper>
         </PostContainer>
     );
 }
 
 export default MyInquiryCreatePage;
-
-// --- Styled Components ---
-
-const ButtonGroup = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    margin-top: 16px;
-`;

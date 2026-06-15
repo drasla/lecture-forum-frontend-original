@@ -1,14 +1,9 @@
-// /src/pages/admin/notice/edit/AdminNoticeEditPage.tsx
-import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "react-router";
-import {
-    type NoticeInputType,
-    noticeSchema,
-} from "../../../../schemas/admin/notice/noticeSchema.ts";
+import { type NoticeInputType, noticeSchema } from "../../../../schemas/notice/noticeSchema.ts";
+import { useEffect, useState } from "react";
 import noticeApi from "../../../../api/user/noticeApi.ts";
-import adminNoticeApi from "../../../../api/admin/adminNoticeApi.ts";
 import {
     AdminButtonGroup,
     AdminContainer,
@@ -21,65 +16,55 @@ import Card from "../../../../components/common/card/Card.tsx";
 import InputGroup from "../../../../components/common/input/InputGroup.tsx";
 import TextareaGroup from "../../../../components/common/textarea/TextareaGroup.tsx";
 import Button from "../../../../components/common/button/Button.tsx";
+import adminNoticeApi from "../../../../api/admin/adminNoticeApi.ts";
 
 function AdminNoticeUpdatePage() {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>(); // URL에서 공지사항 ID 추출
-    const noticeId = Number(id);
 
-    const [isPageLoading, setIsPageLoading] = useState(true);
-
+    const { id } = useParams<{ id: string }>();
     const {
         register,
         handleSubmit,
-        reset, // 💡 API로 불러온 데이터를 폼에 채워넣기 위한 함수
+        reset, // react-hook-form 이 관리하고 있는 state 값을 리셋하겠다
+        // setValue,              // react-hook-form 이 관리하고 있는 state 값을 정하겠다
         formState: { errors, isSubmitting },
-    } = useForm<NoticeInputType>({
+    } = useForm({
         resolver: zodResolver(noticeSchema),
+        mode: "onBlur",
     });
 
-    // 1. 기존 공지사항 데이터 불러오기
+    // 원래 있던 글의 내용을 불러와서
+    // 그걸 input과 textarea에 넣어줘야 됨
+
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
-        if (isNaN(noticeId)) {
-            alert("잘못된 접근입니다.");
-            navigate("/admin/notice");
-            return;
-        }
-
-        const fetchNotice = async () => {
+        const loadNotice = async () => {
             try {
-                // 💡 조회는 권한이 필요 없는 공용 API 사용
-                const noticeData = await noticeApi.getNoticeById(noticeId);
-
-                // 💡 불러온 데이터를 폼의 기본값으로 세팅 (reset)
+                const data = await noticeApi.getNoticeById(Number(id));
                 reset({
-                    title: noticeData.title,
-                    content: noticeData.content,
+                    title: data.title,
+                    content: data.content,
                 });
             } catch (error) {
-                console.error("공지사항 데이터 로드 실패:", error);
+                console.log(error);
                 alert("존재하지 않거나 삭제된 공지사항입니다.");
                 navigate("/admin/notice");
             } finally {
-                setIsPageLoading(false);
+                setIsLoading(false);
             }
         };
 
-        fetchNotice().then(() => {});
-    }, [noticeId, navigate, reset]);
+        loadNotice().then(() => {});
+    }, [id, navigate, reset]);
 
-    // 2. 수정 데이터 전송
-    const onSubmit = async (data: NoticeInputType) => {
+    const execUpdate = async (data: NoticeInputType) => {
         try {
-            // 💡 수정은 관리자 전용 API 사용
-            await adminNoticeApi.updateNotice(noticeId, data);
-            alert("공지사항이 성공적으로 수정되었습니다.");
-
-            // 수정 완료 후 목록으로 이동 (뒤로 가기 시 이전 페이지네이션 상태 유지를 위해 -1 옵션도 고려할 수 있음)
-            // 여기서는 깔끔하게 목록 1페이지로 가거나 브라우저 뒤로가기 활용
-            navigate(-1);
+            await adminNoticeApi.updateNotice(Number(id), data);
+            // navigate(-1); -> 뒤로가기를 해도 글 상세
+            navigate(`/admin/notice/${id}`); // 글 상세
         } catch (error) {
-            console.error("공지사항 수정 실패:", error);
+            console.log(error);
             alert("공지사항 수정 중 오류가 발생했습니다.");
         }
     };
@@ -90,43 +75,39 @@ function AdminNoticeUpdatePage() {
                 <AdminTitle>공지사항 수정</AdminTitle>
             </AdminPageHeader>
 
-            <Card padding="32px">
-                {isPageLoading ? (
+            <Card>
+                {isLoading ? (
                     <AdminLoadingText>데이터를 불러오는 중입니다...</AdminLoadingText>
                 ) : (
-                    <AdminForm onSubmit={handleSubmit(onSubmit)}>
+                    <AdminForm onSubmit={handleSubmit(execUpdate)}>
                         <InputGroup
-                            id="title"
-                            label="공지사항 제목"
-                            placeholder="제목을 입력하세요"
+                            id={"title"}
+                            label={"제목"}
+                            placeholder={"제목을 입력하세요"}
                             errorMessage={errors.title?.message}
                             registerObj={register("title")}
                         />
-
                         <TextareaGroup
-                            id="content"
-                            label="공지사항 내용"
-                            placeholder="사용자들에게 안내할 공지사항 내용을 상세히 적어주세요."
+                            id={"content"}
+                            label={"내용"}
+                            placeholder={"내용을 입력하세요"}
                             errorMessage={errors.content?.message}
                             registerObj={register("content")}
-                            style={{ minHeight: "300px" }}
                         />
 
-                        <AdminButtonGroup $align="right" style={{ marginTop: "16px" }}>
+                        <AdminButtonGroup $align={"right"} style={{ marginTop: "16px" }}>
                             <Button
-                                type="button"
-                                variant="text"
-                                color="secondary"
-                                onClick={() => navigate(-1)} // 취소 시 이전 페이지로 (검색/페이지네이션 파라미터 유지)
-                                disabled={isSubmitting}>
+                                color={"secondary"}
+                                variant={"text"}
+                                onClick={() => navigate(-1)}>
                                 취소
                             </Button>
                             <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
+                                color={"primary"}
+                                variant={"contained"}
+                                type={"submit"}
                                 disabled={isSubmitting}>
-                                {isSubmitting ? "수정 중..." : "수정 완료"}
+                                {isSubmitting ? "저장 중" : "수정"}
                             </Button>
                         </AdminButtonGroup>
                     </AdminForm>

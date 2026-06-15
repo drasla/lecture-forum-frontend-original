@@ -19,9 +19,9 @@ import {
     type AdminUpdateUserInputType,
     adminUpdateUserSchema,
 } from "../../../../schemas/admin/user/adminUpdateUserSchema.ts";
+import adminUserApi from "../../../../api/admin/user/adminUserApi.ts";
 import * as axios from "axios";
 import { useEffect, useState } from "react";
-import adminUserApi from "../../../../api/admin/adminUserApi.ts";
 
 function AdminUserUpdatePage() {
     const navigate = useNavigate();

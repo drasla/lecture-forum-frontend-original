@@ -20,7 +20,7 @@ export const PostTitle = styled.h2`
     display: flex;
     align-items: center;
     gap: 20px;
-
+    
     small {
         font-size: 14px;
         font-weight: 400;
@@ -50,7 +50,7 @@ export const VoteSectionTitle = styled.h3`
     display: flex;
     align-items: center;
     gap: 10px;
-
+    
     small {
         font-size: 13px;
         font-weight: 400;
@@ -81,40 +81,40 @@ export const BoardWrapper = styled.div`
 export const BoardTable = styled.table`
     width: 100%;
     border-collapse: collapse;
-
+    
     thead {
         background-color: ${props => props.theme.colors.background.default};
         border-bottom: 1px solid ${props => props.theme.colors.divider};
     }
-
+    
     tbody tr {
         border-bottom: 1px solid ${props => props.theme.colors.divider};
         transition: all 0.2s;
-
+        
         &:last-child {
             border-bottom: none;
         }
-
+        
         &:hover {
             background-color: ${props => props.theme.colors.background.default};
         }
     }
 `;
 
-export const BoardTh = styled.th<{ $width?: string }>`
+export const BoardTh = styled.th<{ $width?: string; }>`
     padding: 16px;
     font-size: 14px;
     font-weight: 600;
     color: ${props => props.theme.colors.text.disabled};
     text-align: center;
-    width: ${props => props.$width || "auto"};
+    width: ${props => props.$width || "auto"}
 `;
 
 export const BoardTd = styled.td<{ $align?: "left" | "center" | "right" }>`
     padding: 16px;
     font-size: 15px;
     text-align: ${props => props.$align || "center"};
-
+    
     &.title-cell {
         text-align: left;
     }
@@ -145,13 +145,13 @@ export const DetailInfo = styled.div`
     align-items: center;
     font-size: 14px;
     color: ${props => props.theme.colors.text.disabled};
-
+    
     .left-info {
         display: flex;
         gap: 16px;
         align-items: center;
     }
-
+    
     .right-info {
         display: flex;
         gap: 16px;
@@ -205,21 +205,21 @@ export const VoteCard = styled.button<{ $color: string }>`
     align-items: center;
     gap: 16px;
     color: ${props => props.theme.colors.text.default};
-
+    
     svg {
         color: ${props => props.$color};
     }
-
+    
     h3 {
         font-size: 20px;
         font-weight: 700;
     }
-
+    
     p {
         font-size: 14px;
         color: ${props => props.theme.colors.text.disabled};
     }
-
+    
     &:hover {
         border-color: ${props => props.$color};
         transform: translateY(-4px);
@@ -252,15 +252,15 @@ export const ResultBar = styled.div<{ $color: string; $width: string }>`
     font-weight: 700;
     font-size: 15px;
     transition: width 1s;
-    white-space: nowrap; // 글자가 줄바꿈이 안되도록
-    overflow: hidden; // 칸이 작아도 부모 요소 크기에 맞춰서 가려지도록
-
+    white-space: nowrap;      // 글자가 줄바꿈이 안되도록
+    overflow: hidden;         // 칸이 작아도 부모 요소 크기에 맞춰서 가려지도록
+    
     .label {
         display: flex;
         align-items: center;
         gap: 8px;
     }
-
+    
     .percent {
         font-size: 18px;
     }
@@ -288,7 +288,7 @@ export const RevoteButton = styled.button`
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s;
-
+    
     &:hover {
         color: ${props => props.theme.colors.text.default};
         border-color: ${props => props.theme.colors.secondary};

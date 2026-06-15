@@ -8,7 +8,7 @@ interface Props extends SelectHTMLAttributes<HTMLSelectElement> {
     id?: string;
     errorMessage?: string;
     registerObj?: UseFormRegisterReturn;
-    children: ReactNode; // ReactNode 타입은 React의 화면 요소를 나타낼 수 있는 대표 타입
+    children: ReactNode;   // ReactNode 타입은 React의 화면 요소를 나타낼 수 있는 대표 타입
     wrap?: boolean;
 }
 

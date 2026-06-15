@@ -1,35 +1,40 @@
-import axiosInstance from "../axiosInstance";
+import axiosInstance from "../axiosInstance.ts";
 import type { Category } from "../../types/category.type.ts";
+import type { AdminCreateCategoryInputType } from "../../schemas/admin/category/adminCreateCategorySchema.ts";
+import type { AdminEditCategoryInputType } from "../../schemas/admin/category/adminEditCategorySchema.ts";
 
 const fetchCategoryList = async (): Promise<Category[]> => {
     const response = await axiosInstance.get("/admin/category/list");
     return response.data.data;
 };
 
-const fetchCategoryById = async (id: number): Promise<Category> => {
+const fetchCategoryById = async (id: number) => {
     const response = await axiosInstance.get(`/admin/category/${id}`);
     return response.data.data;
-};
+}
 
-const createCategory = async (name: string): Promise<Category> => {
-    const response = await axiosInstance.post("/admin/category/create", { name });
+// 카테고리 등록 API
+const createCategory = async (data: AdminCreateCategoryInputType): Promise<Category> => {
+    const response = await axiosInstance.post("/admin/category/create", data);
     return response.data.data;
 };
 
-const updateCategory = async (id: number, name: string): Promise<Category> => {
-    const response = await axiosInstance.patch(`/admin/category/${id}`, { name });
+// 카테고리 수정 API
+const updateCategory = async (id: number, data: AdminEditCategoryInputType): Promise<Category> => {
+    const response = await axiosInstance.patch(`/admin/category/${id}`, data);
     return response.data.data;
-};
+}
 
-const toggleCategoryStatus = async (id: number): Promise<Category> => {
+// 카테고리 온오프 API
+const toggleCategoryStatus = async (id: number) => {
     const response = await axiosInstance.patch(`/admin/category/${id}/status`);
     return response.data.data;
-};
+}
 
 export default {
     fetchCategoryList,
     fetchCategoryById,
     createCategory,
-    updateCategory,
     toggleCategoryStatus,
+    updateCategory,
 };
